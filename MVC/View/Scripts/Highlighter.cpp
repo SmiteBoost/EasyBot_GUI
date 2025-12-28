@@ -8,8 +8,10 @@ Highlighter::Highlighter(QTextDocument *parent)
     keywordFormat.setFontWeight(QFont::Bold);
 
     const QStringList keywords = {
-        "if", "else", "for", "while", "return",
-        "break", "continue", "function", "var", "proto", "Sleep"
+        "and", "break", "do", "else", "elseif", "end", "false",
+        "for", "function", "goto", "if", "in", "local", "nil",
+        "not", "or", "repeat", "return", "then", "true", "until", "while",
+        "proto", "Otc", "msleep"
     };
 
     for (const QString &word : keywords) {
@@ -18,18 +20,21 @@ Highlighter::Highlighter(QTextDocument *parent)
             keywordFormat
         });
     }
+
     QTextCharFormat stringFormat;
     stringFormat.setForeground(QColor("#CE9178"));
+    // Match both single and double quoted strings
     rules.append({
-        QRegularExpression("\".*?\""),
+        QRegularExpression("\".*?\"|'.*?'"),
         stringFormat
     });
 
     QTextCharFormat commentFormat;
     commentFormat.setForeground(QColor("#6A9955"));
 
+    // Lua comments start with --
     rules.append({
-        QRegularExpression("//[^\n]*"),
+        QRegularExpression("--[^\n]*"),
         commentFormat
     });
 

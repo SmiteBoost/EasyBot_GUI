@@ -18,6 +18,8 @@ list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.10.0/msvc2022_64/lib/cmake")
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Qml Network NetworkAuth)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
+find_package(Lua REQUIRED)
+find_path(LUABRIDGE3_INCLUDE_DIRS "luabridge3/LuaBridge/Array.h")
 
 
 set(PROTO_FILE ${CMAKE_SOURCE_DIR}/bot.proto)
@@ -45,6 +47,8 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/MVC/View
         ${CMAKE_CURRENT_SOURCE_DIR}/MVC/Model
         ${CMAKE_CURRENT_SOURCE_DIR}/MVC/Controller
+        ${LUA_INCLUDE_DIR}
+        ${LUABRIDGE3_INCLUDE_DIRS}
 )
 
 file(GLOB_RECURSE MVC
@@ -73,6 +77,7 @@ target_link_libraries(EasyBotGUI PRIVATE
         Qt6::Network
         Qt6::NetworkAuth
         bot_proto
+        ${LUA_LIBRARIES}
 )
 
 set_target_properties(EasyBotGUI PROPERTIES

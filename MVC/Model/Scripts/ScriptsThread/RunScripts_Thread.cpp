@@ -1,48 +1,61 @@
 #include "RunScripts_Thread.h"
+#include "../../../../LuaBindings.h"
 #include <iostream>
 #include <regex>
 #include <QRegularExpression>
 
 void RunScripts_Thread::run() {
-    std::cout << "Running Scripts_Thread" << std::endl;
+    std::cout << "Running Scripts_Thread with Lua" << std::endl;
+    initLua();
+
     for (const auto& script : m_scripts) {
         if (script.enabled) {
-            executeScript(script.text);
+            executeLuaScript(script.text);
         }
     }
+
     while (!isInterruptionRequested()) {
         msleep(100);
     }
+
+    closeLua();
 }
 
-void RunScripts_Thread::executeScript(const std::string& scriptText) {
-    QString qScript = QString::fromStdString(scriptText);
-    QStringList lines = qScript.split(QRegularExpression("[\n;]"), Qt::SkipEmptyParts);
-    for (const QString& line : lines) {
-        if (isInterruptionRequested()) return;
-        parseAndExecute(line.trimmed().toStdString());
+void RunScripts_Thread::initLua() {
+    L = luaL_newstate();
+    luaL_openlibs(L);
+    LuaBindings::registerAll(L);
+
+    // Globalize proto functions
+    const char* globalizeSnippet = 
+        "setmetatable(_G, {"
+        "  __index = function(_, key)"
+        "    local val = proto[key]"
+        "    if type(val) == 'function' then"
+        "      return function(...) return val(proto, ...) end"
+        "    end"
+        "    return val"
+        "  end"
+        "})";
+    
+    if (luaL_dostring(L, globalizeSnippet) != LUA_OK) {
+        std::cerr << "Globalize Error: " << lua_tostring(L, -1) << std::endl;
+        lua_pop(L, 1);
     }
 }
 
-void RunScripts_Thread::parseAndExecute(const std::string& line) {
-    QString qLine = QString::fromStdString(line);
-    if (qLine.isEmpty() || qLine.startsWith("//")) return;
-
-    // Handle proto->talk("message")
-    static QRegularExpression talkRegex(R"(proto\s*->\s*talk\s*\(\s*\"(.*)\"\s*\)\s*)");
-    auto talkMatch = talkRegex.match(qLine);
-    if (talkMatch.hasMatch()) {
-        QString message = talkMatch.captured(1);
-        proto->talk(message.toStdString());
-        return;
+void RunScripts_Thread::closeLua() {
+    if (L) {
+        lua_close(L);
+        L = nullptr;
     }
+}
 
-    // Handle msleep(ms)
-    static QRegularExpression sleepRegex(R"(msleep\s*\(\s*(\d+)\s*\)\s*)");
-    auto sleepMatch = sleepRegex.match(qLine);
-    if (sleepMatch.hasMatch()) {
-        int ms = sleepMatch.captured(1).toInt();
-        msleep(ms);
-        return;
+void RunScripts_Thread::executeLuaScript(const std::string& scriptText) {
+    if (!L) return;
+
+    if (luaL_dostring(L, scriptText.c_str()) != LUA_OK) {
+        std::cerr << "Lua Error: " << lua_tostring(L, -1) << std::endl;
+        lua_pop(L, 1);
     }
 }
