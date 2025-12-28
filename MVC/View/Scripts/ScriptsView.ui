@@ -35,6 +35,9 @@
     </item>
     <item row="0" column="0">
      <widget class="QTableWidget" name="scripts_tableWidget">
+      <attribute name="verticalHeaderCascadingSectionResizes">
+       <bool>false</bool>
+      </attribute>
       <column>
        <property name="text">
         <string>Scripts</string>
