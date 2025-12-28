@@ -13,6 +13,7 @@ class RunScripts_Thread : public QThread {
 
 protected:
     void run() override;
+
 private:
     void initLua();
     void closeLua();

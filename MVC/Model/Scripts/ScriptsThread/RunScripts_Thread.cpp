@@ -15,7 +15,7 @@ void RunScripts_Thread::run() {
     }
 
     while (!isInterruptionRequested()) {
-        msleep(100);
+        msleep(10);
     }
 
     closeLua();

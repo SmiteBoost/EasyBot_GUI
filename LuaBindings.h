@@ -146,21 +146,37 @@ namespace LuaBindings {
                 .addProperty("SouthEast", []{ return (int)Otc::SouthEast; })
                 .addProperty("SouthWest", []{ return (int)Otc::SouthWest; })
                 .addProperty("NorthWest", []{ return (int)Otc::NorthWest; })
+                // Inventory Slots
+                .addProperty("InventorySlotHead", []{ return (int)Otc::InventorySlotHead; })
+                .addProperty("InventorySlotNecklace", []{ return (int)Otc::InventorySlotNecklace; })
+                .addProperty("InventorySlotBackpack", []{ return (int)Otc::InventorySlotBackpack; })
+                .addProperty("InventorySlotArmor", []{ return (int)Otc::InventorySlotArmor; })
+                .addProperty("InventorySlotRight", []{ return (int)Otc::InventorySlotRight; })
+                .addProperty("InventorySlotLeft", []{ return (int)Otc::InventorySlotLeft; })
+                .addProperty("InventorySlotLegs", []{ return (int)Otc::InventorySlotLegs; })
+                .addProperty("InventorySlotFeet", []{ return (int)Otc::InventorySlotFeet; })
+                .addProperty("InventorySlotRing", []{ return (int)Otc::InventorySlotRing; })
+                .addProperty("InventorySlotAmmo", []{ return (int)Otc::InventorySlotAmmo; })
             .endNamespace();
 
         // Register proto instance as a global variable
         luabridge::setGlobal(L, BotClient::getInstance(), "proto");
 
-       // Helper: sleep
-        luabridge::getGlobalNamespace(L)
-            .addFunction("sleep", [](int ms) {
-                QThread::msleep(ms);
-            });
+        // Helper: msleep
         luabridge::getGlobalNamespace(L)
             .addFunction("msleep", [](int ms) {
                 QThread::msleep(ms);
+            })
+            .addFunction("sleep", [](int ms) {
+                QThread::msleep(ms);
+            })
+            .addFunction("getInventorySlotPosition", [](int slot) {
+                Position p;
+                p.x = 0xFFFF;
+                p.y = slot;
+                p.z = 0;
+                return p;
             });
-
     }
 }
 

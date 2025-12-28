@@ -4,7 +4,7 @@
 ScriptEditorDialog::ScriptEditorDialog(const QString &script, QWidget *parent)
     : QDialog(parent) {
     setWindowTitle("Script Editor");
-    resize(400, 400);
+    resize(500, 500);
 
     auto *layout = new QVBoxLayout(this);
 

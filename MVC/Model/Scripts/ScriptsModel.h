@@ -20,6 +20,7 @@ public:
 
     QJsonArray toJson() const;
     void fromJson(const QJsonArray &json);
+
 private:
     std::vector<Script> scripts;
     RunScripts_Thread *runScriptsThread = nullptr;
