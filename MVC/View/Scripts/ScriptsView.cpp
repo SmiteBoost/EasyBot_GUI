@@ -2,6 +2,8 @@
 
 #include <QCheckBox>
 #include <QTextEdit>
+#include <QEvent>
+#include "ScriptEditorDialog.h"
 
 #include "Highlighter.h"
 #include "ui_ScriptsView.h"
@@ -25,6 +27,8 @@ ScriptsView::ScriptsView(QWidget *parent) :
         auto *textEdit = new QTextEdit(ui->scripts_tableWidget);
         ui->scripts_tableWidget->setCellWidget(row, 0, textEdit);
         new Highlighter(textEdit->document());
+        textEdit->installEventFilter(this);
+        textEdit->viewport()->installEventFilter(this);
 
         auto *checkBox = new QCheckBox();
 
@@ -39,4 +43,22 @@ ScriptsView::ScriptsView(QWidget *parent) :
 
 ScriptsView::~ScriptsView() {
     delete ui;
+}
+
+bool ScriptsView::eventFilter(QObject *obj, QEvent *event) {
+    if (event->type() == QEvent::MouseButtonDblClick) {
+        QTextEdit *textEdit = qobject_cast<QTextEdit*>(obj);
+        if (!textEdit && obj->parent()) {
+            textEdit = qobject_cast<QTextEdit*>(obj->parent());
+        }
+
+        if (textEdit) {
+            ScriptEditorDialog dialog(textEdit->toPlainText(), this);
+            if (dialog.exec() == QDialog::Accepted) {
+                textEdit->setPlainText(dialog.getScript());
+            }
+            return true;
+        }
+    }
+    return QMainWindow::eventFilter(obj, event);
 }

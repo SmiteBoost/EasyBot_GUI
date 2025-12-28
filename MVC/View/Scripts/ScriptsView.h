@@ -15,6 +15,9 @@ public:
     explicit ScriptsView(QWidget *parent = nullptr);
     ~ScriptsView() override;
 
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 private:
     Ui::Scripts_View *ui;
 };

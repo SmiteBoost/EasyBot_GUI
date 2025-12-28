@@ -9,7 +9,7 @@ Highlighter::Highlighter(QTextDocument *parent)
 
     const QStringList keywords = {
         "if", "else", "for", "while", "return",
-        "break", "continue", "function", "var"
+        "break", "continue", "function", "var", "proto"
     };
 
     for (const QString &word : keywords) {
