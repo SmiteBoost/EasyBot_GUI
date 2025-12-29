@@ -5,7 +5,6 @@
 #include <QRegularExpression>
 
 void RunScripts_Thread::run() {
-    std::cout << "Running Scripts_Thread with Lua" << std::endl;
     initLua();
 
     for (const auto& script : m_scripts) {

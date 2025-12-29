@@ -347,7 +347,7 @@
          <enum>QFrame::Shape::Box</enum>
         </property>
         <property name="placeholderText">
-         <string>Label or Action (Script in C++/Lua)</string>
+         <string>Label or Action (Script in Lua)</string>
         </property>
        </widget>
       </item>
