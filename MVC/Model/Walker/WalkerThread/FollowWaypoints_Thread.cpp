@@ -4,7 +4,6 @@
 
 
 void FollowWaypoints_Thread::run() {
-    initLua();
     if (waypoints.empty()) return;
     size_t index = findClosest();
     while (!isInterruptionRequested()) {
@@ -15,6 +14,9 @@ void FollowWaypoints_Thread::run() {
         auto wpt = waypoints[index];
         auto playerPos = proto->getPosition(localPlayer);
         if (playerPos.x == wpt.position.x && playerPos.y == wpt.position.y && playerPos.z == wpt.position.z) {
+            if (wpt.option == "Action") {
+                engine->executeLuaScript(wpt.action);
+            }
             index = (index + 1) % waypoints.size();
             emit indexUpdate_signal(static_cast<int>(index));
             continue;
@@ -27,7 +29,6 @@ void FollowWaypoints_Thread::run() {
         }
         msleep(50);
     }
-    closeLua();
 }
 
 int FollowWaypoints_Thread::findClosest() {
