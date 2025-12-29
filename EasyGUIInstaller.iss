@@ -21,11 +21,11 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={userdesktop}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-LicenseFile=C:\Users\blazz\Desktop\Projekty\EasyBot64\LICENSE
+LicenseFile=C:\Users\Wojciech\Desktop\Projects\EasyBot_GUI\LICENSE
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 PrivilegesRequired=lowest
 OutputBaseFilename=EasyBotInstaller
-SetupIconFile=C:\Users\blazz\Desktop\Projekty\EasyInjector\EasyIcon.ico
+SetupIconFile=C:\Users\Wojciech\Desktop\Projects\EasyBot_GUI\EasyIcon.ico
 SolidCompression=yes
 WizardStyle=modern dynamic
 
@@ -33,7 +33,7 @@ WizardStyle=modern dynamic
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "C:\Users\blazz\Desktop\EasyBot_GUI\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\Wojciech\Desktop\GUI\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

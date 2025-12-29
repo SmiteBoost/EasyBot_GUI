@@ -21,9 +21,12 @@ void UseSpell_Thread::run() {
                     std::transform(specName.begin(), specName.end(), specName.begin(), ::tolower);
                     if (specName != spell.targets && spell.targets != "*") continue;
                     auto targetPos = proto->getPosition(spectator);
-                    int dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(targetPos.x)),
-                        std::abs(static_cast<int>(playerPos.y) - static_cast<int>(targetPos.y)));
-                    if (spell.dist > 0 && dist > spell.dist) continue;
+                    int dist = 999;
+                    if (spell.dist > 0) {
+                        dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(targetPos.x)),
+                            std::abs(static_cast<int>(playerPos.y) - static_cast<int>(targetPos.y)));
+                    }
+                    if (dist > spell.dist) continue;
                     if (current_hp_pc < spell.minHp || current_mp < spell.minMp) continue;
                     if (spell.count > 1) {
                         spell.count -=1;
