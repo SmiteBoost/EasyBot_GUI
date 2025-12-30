@@ -66,6 +66,8 @@ void UseSpell_Thread::targetSpell(Spell spell, uintptr_t localPlayer, double cur
 }
 
 void UseSpell_Thread::areaSpell(Spell spell, uintptr_t localPlayer, double current_hp_pc, double current_mp) {
+    if (spell.minMp > current_mp) return;
+    if (spell.minHp > current_hp_pc) return;
     auto playerPos = proto->getPosition(localPlayer);
     auto spectators = proto->getSpectators(playerPos, false);
     for (auto spectator : spectators) {
