@@ -111,22 +111,22 @@ void AttackTargets_Thread::desiredStance(Position playerPos, Position spectatorP
     if (option == "Chase" && dist > 1) {
         auto path = proto->findPath(playerPos, spectatorPos, 100, Otc::PathFindIgnoreCreatures | Otc::PathFindAllowNonPathable);
         if (path.empty()) return;
-        for (int lastDir =0; lastDir < 8; lastDir++) {
-            auto newPos = spectatorPos;
-            if (lastDir == Otc::North) newPos.y +=1;
-            if (lastDir == Otc::East) newPos.x -=1;
-            if (lastDir == Otc::South) newPos.y -=1;
-            if (lastDir == Otc::West) newPos.x +=1;
-            if (lastDir == Otc::NorthEast) newPos.x -=1, newPos.y +=1;
-            if (lastDir == Otc::SouthEast) newPos.x -=1, newPos.y -=1;
-            if (lastDir == Otc::SouthWest) newPos.x +=1, newPos.y -=1;
-            if (lastDir == Otc::NorthWest) newPos.x +=1, newPos.y +=1;
-            auto second_path = proto->findPath(playerPos, newPos, 100, Otc::PathFindAllowNonPathable);
-            if (!second_path.empty()) {
-                proto->walk(second_path.at(0));
-                msleep(100);
-                return;
-            }
+        auto lastDir = path[path.size() - 1];
+        auto newPos = spectatorPos;
+        if (lastDir == Otc::North) newPos.y +=1;
+        if (lastDir == Otc::East) newPos.x -=1;
+        if (lastDir == Otc::South) newPos.y -=1;
+        if (lastDir == Otc::West) newPos.x +=1;
+        if (lastDir == Otc::NorthEast) newPos.x -=1, newPos.y +=1;
+        if (lastDir == Otc::SouthEast) newPos.x -=1, newPos.y -=1;
+        if (lastDir == Otc::SouthWest) newPos.x +=1, newPos.y -=1;
+        if (lastDir == Otc::NorthWest) newPos.x +=1, newPos.y +=1;
+        auto second_path = proto->findPath(playerPos, newPos, 100, Otc::PathFindAllowNonPathable);
+        if (!second_path.empty()) {
+            auto localPlayer = proto->getLocalPlayer();
+            proto->autoWalk(localPlayer, newPos, false);
+            msleep(100);
+            return;
         }
     }
     else if (option == "Stay Away") {

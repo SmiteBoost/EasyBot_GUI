@@ -22,12 +22,6 @@ void FollowWaypoints_Thread::run() {
         auto localPlayer = proto->getLocalPlayer();
         auto wpt = waypoints[index];
         auto playerPos = proto->getPosition(localPlayer);
-        // Only walks if we dont have a target or we want to Lure
-        if (!engine->hasTarget || wpt.option == "Lure") {
-            if (!proto->isAutoWalking(localPlayer)) {
-                performWalk(wpt, localPlayer);
-            }
-        }
         if (playerPos.x == wpt.position.x && playerPos.y == wpt.position.y && playerPos.z == wpt.position.z) {
             index = (index + 1) % waypoints.size();
             if (wpt.option == "Action") {
@@ -55,6 +49,12 @@ void FollowWaypoints_Thread::run() {
             emit indexUpdate_signal(static_cast<int>(index));
             continue;
         }
+        // Only walks if we dont have a target or we want to Lure
+        if (!engine->hasTarget || wpt.option == "Lure") {
+            if (!proto->isAutoWalking(localPlayer)) {
+                performWalk(wpt, localPlayer);
+            }
+        }
         msleep(50);
     }
     
@@ -76,7 +76,6 @@ void FollowWaypoints_Thread::run() {
 }
 
 void FollowWaypoints_Thread::performWalk(Waypoint wpt, uintptr_t localPlayer) {
-    std::cout << wpt.direction << std::endl;
     if (wpt.direction != "C") {
         auto direction = getDirection(wpt.direction);
         proto->walk(direction);
@@ -97,6 +96,7 @@ Otc::Direction FollowWaypoints_Thread::getDirection(const std::string& wpt_direc
     if (wpt_direction == "NE") return Otc::NorthEast;
     if (wpt_direction == "SW") return Otc::SouthWest;
     if (wpt_direction == "SE") return Otc::SouthEast;
+    return Otc::InvalidDirection;
 }
 
 int FollowWaypoints_Thread::findClosest() {
