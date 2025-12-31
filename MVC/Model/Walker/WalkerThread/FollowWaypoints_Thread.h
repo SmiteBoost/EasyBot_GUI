@@ -31,6 +31,8 @@ private:
     LuaEngine* luaScriptEngine;
     
     int findClosest();
+    void performWalk(Waypoint wpt, uintptr_t localPlayer);
+    Otc::Direction getDirection(const std::string& wpt_direction);
     int bestWpt(Waypoint first_wpt, Waypoint second_wpt);
 };
 

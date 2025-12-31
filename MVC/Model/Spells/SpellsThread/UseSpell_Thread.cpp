@@ -100,10 +100,9 @@ void UseSpell_Thread::areaSpell(Spell spell, uintptr_t localPlayer, double curre
                         auto topThing = proto->getTopUseThing(tile);
                         proto->useWith(item, topThing);
                         return;
-                    } else {
-                        proto->useWith(item, localPlayer);
-                        return;
                     }
+                    proto->useWith(item, localPlayer);
+                    return;
                 }
             }
         }

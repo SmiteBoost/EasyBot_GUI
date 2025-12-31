@@ -50,6 +50,7 @@ void AttackTargets_Thread::run()
             if (proto->isDead(currentTarget)) {
                 currentTarget = 0;
             } else {
+                if (currentTarget != proto->getAttackingCreature()) currentTarget = proto->getAttackingCreature();
                 if (!attackCondition(target, currentTarget)) {
                     currentTarget = 0;
                     proto->cancelAttack();
@@ -57,6 +58,7 @@ void AttackTargets_Thread::run()
                     proto->cancelAttackAndFollow();
                     msleep(100);
                 } else {
+                    playerPos = proto->getPosition(localPlayer);
                     auto monsterPos = proto->getPosition(currentTarget);
                     desiredStance(playerPos, monsterPos, target.desiredStance);
                     monstersAttacks(playerPos, monsterPos, target.monstersAttacks);
@@ -122,6 +124,7 @@ void AttackTargets_Thread::desiredStance(Position playerPos, Position spectatorP
             auto second_path = proto->findPath(playerPos, newPos, 100, Otc::PathFindAllowNonPathable);
             if (!second_path.empty()) {
                 proto->walk(second_path.at(0));
+                msleep(100);
                 return;
             }
         }

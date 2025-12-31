@@ -36,10 +36,10 @@ void WalkerModel::addItem(const QString &direction, const QString &option, const
         item = QStringLiteral("%1 %2 %3 %4 %5").arg(option, direction).arg(position.x).arg(position.y).arg(position.z);
     }
     Waypoint wpt;
+    wpt.direction = direction.toStdString();
     wpt.position = position;
     wpt.option = option.toStdString();
     wpt.action = action.toStdString();
-    wpt.direction = direction.toStdString();
     waypoints.push_back(wpt);
     emit addItem_signal(item);
 }
@@ -49,7 +49,7 @@ void WalkerModel::recordWaypoints(bool state, int sqmDist, const QString &direct
         if (!recordWaypointsThread) {
             recordWaypointsThread = new RecordWaypoints_Thread(sqmDist, direction, option, this);
             connect(recordWaypointsThread, &RecordWaypoints_Thread::addWaypoint_signal,
-                    this, &WalkerModel::addItem_slot);
+                    this, &WalkerModel::addItem);
             connect(recordWaypointsThread, &QThread::finished, recordWaypointsThread, &QObject::deleteLater);
             connect(recordWaypointsThread, &QThread::finished, this, [this]() {
                 this->recordWaypointsThread = nullptr;
@@ -81,15 +81,6 @@ void WalkerModel::startWalker(bool state) {
             followWaypointsThread->quit();
         }
     }
-}
-
-void WalkerModel::addItem_slot(Position position, const QString &direction, const QString &option) {
-    auto item = QStringLiteral("%1 %2 %3 %4 %5").arg(option, direction).arg(position.x).arg(position.y).arg(position.z);
-    Waypoint wpt;
-    wpt.position = position;
-    wpt.option = option.toStdString();
-    waypoints.push_back(wpt);
-    emit addItem_signal(item);
 }
 
 void WalkerModel::indexUpdate_slot(int index) {

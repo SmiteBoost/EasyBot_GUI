@@ -28,7 +28,6 @@ public:
     void deleteItem(const int &index);
 
 public slots:
-    void addItem_slot(Position position, const QString &direction, const QString &option);
     void indexUpdate_slot(int index);
 signals:
     void addItem_signal(const QString &item);

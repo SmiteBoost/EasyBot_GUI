@@ -22,48 +22,38 @@ void FollowWaypoints_Thread::run() {
         auto localPlayer = proto->getLocalPlayer();
         auto wpt = waypoints[index];
         auto playerPos = proto->getPosition(localPlayer);
+        // Only walks if we dont have a target or we want to Lure
+        if (!engine->hasTarget || wpt.option == "Lure") {
+            if (!proto->isAutoWalking(localPlayer)) {
+                performWalk(wpt, localPlayer);
+            }
+        }
         if (playerPos.x == wpt.position.x && playerPos.y == wpt.position.y && playerPos.z == wpt.position.z) {
             index = (index + 1) % waypoints.size();
             if (wpt.option == "Action") {
-                std::cout << "Executing waypoint action script..." << std::endl;
                 auto* actionEngine = new LuaEngine(wpt.action, nullptr);
                 actionEngine->start();
-                
-                // Wait for the script to complete (check for interruption every 100ms)
                 while (actionEngine->isRunning()) {
                     if (isInterruptionRequested()) {
-                        std::cout << "Interrupting waypoint action script..." << std::endl;
                         actionEngine->requestStop();
                         actionEngine->wait(1000);
                         delete actionEngine;
-                        return; // Exit the walker thread
+                        return;
                     }
                     msleep(100);
                 }
-                
-                // Check if script returned a label to goto
                 std::string returnedLabel = actionEngine->getReturnedString();
                 delete actionEngine;
-                std::cout << "Returned value: " << returnedLabel << std::endl;
-                
                 if (!returnedLabel.empty()) {
                     for (size_t i = 0; i < waypoints.size(); ++i) {
                         if (waypoints[i].action == returnedLabel) {
                             index = i;
-                            std::cout << "Action script returned goto '" << returnedLabel << "' - jumping to index " << i << std::endl;
                         }
                     }
                 }
-                std::cout << "Waypoint action script completed" << std::endl;
             }
             emit indexUpdate_signal(static_cast<int>(index));
             continue;
-        }
-        // Only walks if we dont have a target or we want to Lure
-        if (!engine->hasTarget || wpt.option == "Lure") {
-            if (!proto->isAutoWalking(localPlayer)) {
-                proto->autoWalk(localPlayer, wpt.position, false);
-            }
         }
         msleep(50);
     }
@@ -83,6 +73,30 @@ void FollowWaypoints_Thread::run() {
         luaScriptEngine = nullptr;
         std::cout << "Walker Lua script stopped" << std::endl;
     }
+}
+
+void FollowWaypoints_Thread::performWalk(Waypoint wpt, uintptr_t localPlayer) {
+    std::cout << wpt.direction << std::endl;
+    if (wpt.direction != "C") {
+        auto direction = getDirection(wpt.direction);
+        proto->walk(direction);
+        return;
+    }
+    auto playerPos = proto->getPosition(localPlayer);
+    if ((playerPos.x != wpt.position.x || playerPos.y != wpt.position.y) && playerPos.z == wpt.position.z) {
+        proto->autoWalk(localPlayer, wpt.position, false);
+    }
+}
+
+Otc::Direction FollowWaypoints_Thread::getDirection(const std::string& wpt_direction) {
+    if (wpt_direction == "N") return Otc::North;
+    if (wpt_direction == "E") return Otc::East;
+    if (wpt_direction == "S") return Otc::South;
+    if (wpt_direction == "W") return Otc::West;
+    if (wpt_direction == "NW") return Otc::NorthWest;
+    if (wpt_direction == "NE") return Otc::NorthEast;
+    if (wpt_direction == "SW") return Otc::SouthWest;
+    if (wpt_direction == "SE") return Otc::SouthEast;
 }
 
 int FollowWaypoints_Thread::findClosest() {
@@ -107,6 +121,7 @@ int FollowWaypoints_Thread::findClosest() {
 
     return closestIndex;
 }
+
 
 int FollowWaypoints_Thread::bestWpt(Waypoint first_wpt, Waypoint second_wpt) {
     auto localPlayer = proto->getLocalPlayer();
