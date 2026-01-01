@@ -24,10 +24,10 @@ AllowNoIcons=yes
 LicenseFile=C:\Users\Wojciech\Desktop\Projects\EasyBot_GUI\LICENSE
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 PrivilegesRequired=lowest
-OutputBaseFilename=EasyBotInstaller
+OutputBaseFilename=EasyBotGUI_Installer
 SetupIconFile=C:\Users\Wojciech\Desktop\Projects\EasyBot_GUI\EasyIcon.ico
 SolidCompression=yes
-WizardStyle=modern dynamic
+WizardStyle=modern
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
