@@ -15,6 +15,11 @@ Q_OBJECT
 public:
     explicit AgentAIView(QWidget *parent = nullptr);
     ~AgentAIView() override;
+    std::vector<std::string> getNames();
+    std::string getHeader();
+    std::string getModel();
+    std::string getApiKey();
+    bool getList();
 
 private:
     Ui::AgentAI_View *ui;

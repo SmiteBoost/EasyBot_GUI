@@ -61,6 +61,13 @@ BotController::BotController(BotView *botView, QObject *parent)
         }
     });
 
+    // Agent
+    connect(m_botView, &BotView::startAgent_signal, this, [this](bool checked){
+        if (m_agentAIController) {
+            m_agentAIController->startAgent_slot(checked);
+        }
+    });
+
     // Save & Load
     connect(m_botView, &BotView::saveRequested, this, &BotController::onSaveRequested);
     connect(m_botView, &BotView::loadRequested, this, &BotController::onLoadRequested);

@@ -20,12 +20,13 @@ void AgentAIController::showView() {
     m_view->show();
 }
 
-QJsonArray AgentAIController::saveSettings() const {
-    if (m_model) return m_model->toJson();
-    return QJsonArray();
-}
 
-void AgentAIController::loadSettings(const QJsonArray &json) {
-    if (m_model) m_model->fromJson(json);
+void AgentAIController::startAgent_slot(bool state) {
+    auto names = m_view->getNames();
+    auto header = m_view->getHeader();
+    auto model = m_view->getModel();
+    auto apiKey = m_view->getApiKey();
+    auto list = m_view->getList();
+    m_model->startAgent(state, names, header, model, apiKey, list);
 }
 

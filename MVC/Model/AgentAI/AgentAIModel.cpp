@@ -11,12 +11,29 @@ AgentAIModel::AgentAIModel(QObject *parent)
 }
 
 AgentAIModel::~AgentAIModel() {
-}
-QJsonArray AgentAIModel::toJson() const {
-    QJsonArray jsonArray;
-    return jsonArray;
+    if (startAgentThread) {
+        startAgentThread->quit();
+        startAgentThread->wait();
+        delete startAgentThread;
+    }
 }
 
-void AgentAIModel::fromJson(const QJsonArray &json) {
+void AgentAIModel::startAgent(bool state, const std::vector<std::string> &names, std::string header, std::string model, std::string apiKey, bool list) {
+    if (state) {
+        if (!startAgentThread) {
+            startAgentThread = new AgentThread(names, header, model, apiKey, list, this);
+            connect(startAgentThread, &QThread::finished, startAgentThread, &QObject::deleteLater);
+            connect(startAgentThread, &QThread::finished, this, [this]() {
+                this->startAgentThread = nullptr;
+            });
+            startAgentThread->start();
+        }
+    } else {
+        if (startAgentThread) {
+            startAgentThread->requestInterruption();
+            startAgentThread->quit();
+        }
+    }
 }
+
 

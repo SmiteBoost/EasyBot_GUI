@@ -33,6 +33,7 @@ BotView::BotView(QWidget *parent)
     connect(ui->healing_checkBox, &QCheckBox::toggled, this, &BotView::startHealing_signal);
     connect(ui->spells_checkBox, &QCheckBox::toggled, this, &BotView::startSpells_signal);
     connect(ui->scripts_checkBox, &QCheckBox::toggled, this, &BotView::startScripts_signal);
+    connect(ui->ai_checkBox, &QCheckBox::toggled, this, &BotView::startAgent_signal);
 
     connect(ui->save_pushButton, &QPushButton::clicked, this, &BotView::onSaveClicked);
     connect(ui->load_pushButton, &QPushButton::clicked, this, &BotView::onLoadClicked);
