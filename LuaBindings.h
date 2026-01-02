@@ -2,6 +2,7 @@
 #define LUABINDINGS_H
 #include <lua.hpp>
 #include <luabridge3/LuaBridge/LuaBridge.h>
+#include <luabridge3/LuaBridge/Vector.h>
 #include "../../const.h"
 #include "../../proto_functions_client.h"
 

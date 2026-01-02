@@ -32,14 +32,14 @@ uintptr_t BotClient::getItem(uintptr_t container, uint8_t slot)
     return response.value();
 }
 
-std::deque<uintptr_t> BotClient::getItems(uintptr_t value)
+std::vector<uintptr_t> BotClient::getItems(uintptr_t value)
 {
     UInt64Value request;
     request.set_value(value);
     bot_Uint64List response;
     ClientContext context;
     Status status = stub->GetItems(&context, request, &response);
-    std::deque<uintptr_t> items;
+    std::vector<uintptr_t> items;
     if (status.ok()) {
         for (const auto& item : response.items()) {
             items.push_back(item);

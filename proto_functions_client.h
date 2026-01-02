@@ -30,7 +30,7 @@ public:
     // Functions:
     // Container
     uintptr_t getItem(uintptr_t container, uint8_t slot);
-    std::deque<uintptr_t> getItems(uintptr_t container);
+    std::vector<uintptr_t> getItems(uintptr_t container);
     int getItemsCount(uintptr_t container);
     Position getSlotPosition(uintptr_t container, int slot);
     std::string getContainerName(uintptr_t container);
