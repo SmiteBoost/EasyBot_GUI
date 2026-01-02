@@ -10,12 +10,34 @@ void AttackTargets_Thread::run()
     Position lastTargetPos{};
     uintptr_t currentTarget = 0;
     size_t index = 0;
+    Position monsterPos{};
+    bool looted = false;
     engine->hasTarget = false;
     while (!isInterruptionRequested()) {
         auto target = m_targets[index];
         auto localPlayer = proto->getLocalPlayer();
         auto playerPos = proto->getPosition(localPlayer);
         // Attacking target logic
+        if (currentTarget) {
+            if (proto->isDead(currentTarget)) {
+                currentTarget = 0;
+            } else {
+                if (currentTarget != proto->getAttackingCreature()) currentTarget = proto->getAttackingCreature();
+                if (!attackCondition(target, currentTarget)) {
+                    currentTarget = 0;
+                    proto->cancelAttack();
+                    msleep(100);
+                    proto->cancelAttackAndFollow();
+                    msleep(100);
+                } else {
+                    looted = true;
+                    playerPos = proto->getPosition(localPlayer);
+                    monsterPos = proto->getPosition(currentTarget);
+                    desiredStance(playerPos, monsterPos, target.desiredStance);
+                    monstersAttacks(playerPos, monsterPos, target.monstersAttacks);
+                }
+            }
+        }
         if (!proto->isAttacking()) {
             auto spectators = proto->getSpectators(playerPos, false);
             std::vector<uintptr_t> monsters;
@@ -24,11 +46,17 @@ void AttackTargets_Thread::run()
                     monsters.emplace_back(spectator);
                 }
             }
+            if (monsterPos.x != 0 && monsterPos.x != 0xFFFF && m_openCorpseState && looted) {
+                looted = false;
+                auto tile = proto->getTile(monsterPos);
+                auto getTopThing = proto->getTopUseThing(tile);
+                proto->open(getTopThing, 0);
+            }
             currentTarget = 0;
             int best_match = 999;
             // Attack closest target
             for (auto monster : monsters) {
-                auto monsterPos = proto->getPosition(monster);
+                monsterPos = proto->getPosition(monster);
                 int dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(monsterPos.x)),
                     std::abs(static_cast<int>(playerPos.y) - static_cast<int>(monsterPos.y)));
                 if (dist < best_match) {
@@ -43,26 +71,6 @@ void AttackTargets_Thread::run()
                 engine->hasTarget = true;
                 proto->attack(currentTarget, false);
                 msleep(100);
-            }
-        }
-
-        if (currentTarget) {
-            if (proto->isDead(currentTarget)) {
-                currentTarget = 0;
-            } else {
-                if (currentTarget != proto->getAttackingCreature()) currentTarget = proto->getAttackingCreature();
-                if (!attackCondition(target, currentTarget)) {
-                    currentTarget = 0;
-                    proto->cancelAttack();
-                    msleep(100);
-                    proto->cancelAttackAndFollow();
-                    msleep(100);
-                } else {
-                    playerPos = proto->getPosition(localPlayer);
-                    auto monsterPos = proto->getPosition(currentTarget);
-                    desiredStance(playerPos, monsterPos, target.desiredStance);
-                    monstersAttacks(playerPos, monsterPos, target.monstersAttacks);
-                }
             }
         }
         msleep(50);
