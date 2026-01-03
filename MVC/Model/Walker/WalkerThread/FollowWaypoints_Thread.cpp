@@ -28,7 +28,7 @@ void FollowWaypoints_Thread::run() {
         if (index != lastIndex) {
             lastIndex = index;
             stuckTimer.restart();
-        } else if (stuckTimer.hasExpired(25000)) {
+        } else if (stuckTimer.hasExpired(10000)) {
             index = findClosest();
             lastIndex = index;
             stuckTimer.restart();
@@ -48,6 +48,8 @@ void FollowWaypoints_Thread::run() {
                     if (index == -1) return;
                     wpt = waypoints[index];
                 }
+            } else if (stuckTimer.hasExpired(5000)) {
+                if (wpt.option == "Stand" || wpt.option == "Lure") performWalk(wpt, localPlayer);
             }
         } else {
             msleep(500);
@@ -137,7 +139,7 @@ void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer) {
         auto tile = proto->getTile(wptPos);
         auto topThing = proto->getTopUseThing(tile);
         proto->use(topThing);
-        msleep(2500);
+        msleep(1500);
     } else {
         auto containers = proto->getContainers();
         for (auto container : containers) {
@@ -147,7 +149,7 @@ void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer) {
                     auto tile = proto->getTile(wptPos);
                     auto topThing = proto->getTopUseThing(tile);
                     proto->useWith(item, topThing);
-                    msleep(2500);
+                    msleep(1500);
                     return;
                 }
             }
