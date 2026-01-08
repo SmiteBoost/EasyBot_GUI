@@ -74,10 +74,17 @@
       <item>
        <widget class="QPushButton" name="alarms_pushButton">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
          <string>Alarms</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="navigation_pushButton">
+        <property name="text">
+         <string>Navigation</string>
         </property>
        </widget>
       </item>
@@ -119,6 +126,13 @@
         </property>
         <property name="text">
          <string>AI</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="miscellaneous_pushButton">
+        <property name="text">
+         <string>Miscellaneous</string>
         </property>
        </widget>
       </item>
