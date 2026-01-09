@@ -23,6 +23,7 @@ WalkerController::WalkerController(QObject *parent)
     connect(m_model, &WalkerModel::clearListWidget_signal, this, &WalkerController::clearListWidget_Model);
 
 
+
     m_view->show();
 }
 

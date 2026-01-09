@@ -1,7 +1,3 @@
-//
-// Created by Wojciech on 11.10.2025.
-//
-
 #ifndef BOTCONTROLLER_H
 #define BOTCONTROLLER_H
 #include <QPointer>
@@ -16,6 +12,8 @@
 #include "Targeting/TargetingController.h"
 #include "Scripts/ScriptsController.h"
 #include "AgentAI/AgentAIController.h"
+#include "Alarms/AlarmsController.h"
+#include "Miscellaneous/MiscellaneousController.h"
 
 
 class BotController : public QObject
@@ -33,6 +31,8 @@ private slots:
     void onShowSpellsModule();
     void onShowScriptsModule();
     void onShowAgentAIModule();
+    void onShowAlarmsModule();
+    void onShowMiscellaneousModule();
 
     void onSaveRequested(const QString &name, const QString &category);
     void onLoadRequested(const QString &name, const QString &category);
@@ -50,6 +50,8 @@ private:
     SpellsController *m_spellsController;
     ScriptsController *m_scriptsController;
     AgentAIController *m_agentAIController;
+    AlarmsController *m_alarmsController;
+    MiscellaneousController *m_miscellaneousController;
 };
 
 

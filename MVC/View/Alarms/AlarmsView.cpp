@@ -11,6 +11,8 @@
 AlarmsView::AlarmsView(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::Alarms_View) {
     ui->setupUi(this);
+
+    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
 }
 
 AlarmsView::~AlarmsView() {

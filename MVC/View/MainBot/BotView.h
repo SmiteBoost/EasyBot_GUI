@@ -30,6 +30,8 @@ public:
     void openSpellsViewRequested();
     void openScriptsViewRequested();
     void openAgentAIViewRequested();
+    void openAlarmsViewRequested();
+    void openMiscellaneousViewRequested();
 
     void startWalker_signal(bool state);
     void startTargeting_signal(bool state);

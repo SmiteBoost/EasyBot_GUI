@@ -9,7 +9,9 @@ BotController::BotController(BotView *botView, QObject *parent)
     m_lootingController(nullptr),
     m_spellsController(nullptr),
     m_scriptsController(nullptr),
-    m_agentAIController(nullptr)
+    m_agentAIController(nullptr),
+    m_alarmsController(nullptr),
+    m_miscellaneousController(nullptr)
 {
     connect(m_botView, &BotView::openWalkerView, this, &BotController::openWalkerView);
     connect(m_botView, &BotView::openTargetingViewRequested, this, &BotController::onShowTargetingModule);
@@ -18,6 +20,8 @@ BotController::BotController(BotView *botView, QObject *parent)
     connect(m_botView, &BotView::openSpellsViewRequested, this, &BotController::onShowSpellsModule);
     connect(m_botView, &BotView::openScriptsViewRequested, this, &BotController::onShowScriptsModule);
     connect(m_botView, &BotView::openAgentAIViewRequested, this, &BotController::onShowAgentAIModule);
+    connect(m_botView, &BotView::openAlarmsViewRequested, this, &BotController::onShowAlarmsModule);
+    connect(m_botView, &BotView::openMiscellaneousViewRequested, this, &BotController::onShowMiscellaneousModule);
 
     // Walker
     connect(m_botView, &BotView::startWalker_signal, this, [this](bool checked){
@@ -234,5 +238,23 @@ void BotController::onShowAgentAIModule() {
         m_agentAIController = new AgentAIController();
     } else {
         m_agentAIController->showView();
+    }
+}
+
+void BotController::onShowAlarmsModule() {
+    if (!m_alarmsController)
+    {
+        m_alarmsController = new AlarmsController();
+    } else {
+        m_alarmsController->showView();
+    }
+}
+
+void BotController::onShowMiscellaneousModule() {
+    if (!m_miscellaneousController)
+    {
+        m_miscellaneousController = new MiscellaneousController();
+    } else {
+        m_miscellaneousController->showView();
     }
 }

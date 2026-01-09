@@ -8,6 +8,8 @@ LootingView::LootingView(QWidget *parent) :
     ui->setupUi(this);
 
     setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+
+
     connect(ui->add_pushButton, &QPushButton::clicked, this, [this]() {
         auto itemID = ui->source_lineEdit->text().toInt();
         auto destination = ui->dest_lineEdit->text();

@@ -12,8 +12,6 @@ public:
     ~AgentAIController();
 
     void showView();
-    QJsonArray saveSettings() const;
-    void loadSettings(const QJsonArray &json);
 
 public slots:
 void startAgent_slot(bool state);
