@@ -54,7 +54,6 @@ public:
     void autoWalkGame(const std::vector<Otc::Direction> &dirs, const Position &startPos);
     void turn(Otc::Direction direction);
     void stop();
-    void look(const uintptr_t& thing, const bool isBattleList);
     void move(const uintptr_t &thing, const Position& toPos, int count);
     void moveToParentContainer(const uintptr_t& thing, const int count);
     void use(const uintptr_t &thing);
