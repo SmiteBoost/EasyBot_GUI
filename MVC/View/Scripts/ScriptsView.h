@@ -18,11 +18,11 @@ public:
     explicit ScriptsView(QWidget *parent = nullptr);
     ~ScriptsView() override;
 
-    void addItem(bool state, const QString &name, const QString &script_text);
+    void addItem(bool state, const QString &name, const QString &script_text, int sleepTime);
     void clearTableWidget();
 
     signals:
-    void addItem_signal(const int &id, bool state, const QString &name, const QString &script_text);
+    void addItem_signal(const int &id, bool state, const QString &name, const QString &script_text, int sleepTime);
     void deleteItem_signal(const int &index);
 
 protected:

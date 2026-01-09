@@ -11,7 +11,12 @@ void RunScripts_Thread::run() {
     // Create and start a thread for each enabled script
     for (const auto& script : m_scripts) {
         if (script.enabled) {
-            auto* luaEngine = new LuaEngine(script.text, nullptr);
+            std::string wrappedScript = "while true do\n";
+            wrappedScript += "    sleep(" + std::to_string(script.sleepTime) + ")\n";
+            wrappedScript += script.text + "\n";
+            wrappedScript += "end";
+            
+            auto* luaEngine = new LuaEngine(wrappedScript, nullptr);
             luaEngines.push_back(luaEngine);
             luaEngine->start();
         }

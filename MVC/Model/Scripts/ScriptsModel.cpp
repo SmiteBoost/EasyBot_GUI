@@ -18,11 +18,12 @@ ScriptsModel::~ScriptsModel() {
     }
 }
 
-void ScriptsModel::addItem(const int &id, bool state, const QString &name, const QString &script_text) {
+void ScriptsModel::addItem(const int &id, bool state, const QString &name, const QString &script_text, int sleepTime) {
     Script script;
     script.name = name.toStdString();
     script.text = script_text.toStdString();
     script.enabled = state;
+    script.sleepTime = sleepTime;
     if (id < scripts.size()) {
         scripts[id] = script;
     } else {
@@ -65,6 +66,7 @@ QJsonArray ScriptsModel::toJson() const {
         obj["name"] = script.name.c_str();
         obj["text"] = script.text.c_str();
         obj["enabled"] = script.enabled;
+        obj["sleep_time"] = script.sleepTime;
         jsonArray.append(obj);
     }
     return jsonArray;
@@ -79,7 +81,8 @@ void ScriptsModel::fromJson(const QJsonArray &json) {
         script.name = obj["name"].toString().toStdString();
         script.text = obj["text"].toString().toStdString();
         script.enabled = obj["enabled"].toBool();
+        script.sleepTime = obj.contains("sleep_time") ? obj["sleep_time"].toInt() : 100;
         scripts.push_back(script);
-        emit addItem_signal(script.enabled, QString::fromStdString(script.name), QString::fromStdString(script.text));
+        emit addItem_signal(script.enabled, QString::fromStdString(script.name), QString::fromStdString(script.text), script.sleepTime);
     }
 }

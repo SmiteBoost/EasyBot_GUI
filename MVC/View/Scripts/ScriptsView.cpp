@@ -17,8 +17,11 @@ ScriptsView::ScriptsView(QWidget *parent) :
     ui->setupUi(this);
 
 
-    ui->scripts_tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->scripts_tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    ui->scripts_tableWidget->setColumnCount(3);
+    ui->scripts_tableWidget->setHorizontalHeaderLabels({"Sleep (ms)", "Scripts", "Status"});
+    ui->scripts_tableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    ui->scripts_tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->scripts_tableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
 
     connect(ui->remove_pushButton, &QPushButton::clicked, this, [this]() {
         int row = ui->scripts_tableWidget->currentRow();
@@ -30,12 +33,12 @@ ScriptsView::ScriptsView(QWidget *parent) :
 
     connect(ui->add_pushButton, &QPushButton::clicked, this, [this]() {
         int row = ui->scripts_tableWidget->rowCount();
-        addItem(false, "New Script", "");
-        emit addItem_signal(row, false, "New Script", "");
+        addItem(false, "New Script", "", 100);
+        emit addItem_signal(row, false, "New Script", "", 100);
     });
 
     connect(ui->scripts_tableWidget, &QTableWidget::itemDoubleClicked, this, [this](QTableWidgetItem *item) {
-        if (item->column() == 0 && (item->flags() & Qt::ItemIsEnabled)) {
+        if (item->column() == 1 && (item->flags() & Qt::ItemIsEnabled)) {
             QString currentName = item->text();
             QString currentScript = item->data(Qt::UserRole).toString();
 
@@ -45,64 +48,88 @@ ScriptsView::ScriptsView(QWidget *parent) :
                 item->setData(Qt::UserRole, dialog.getScript());
 
                 int row = item->row();
-                QWidget *cellWidget = ui->scripts_tableWidget->cellWidget(row, 1);
+                QWidget *cellWidget = ui->scripts_tableWidget->cellWidget(row, 2);
                 if (cellWidget) {
                     QCheckBox *checkBox = cellWidget->findChild<QCheckBox *>();
                     bool isChecked = checkBox ? checkBox->isChecked() : false;
-                    emit addItem_signal(row, isChecked, dialog.getName(), dialog.getScript());
+
+                    QWidget *sleepWidget = ui->scripts_tableWidget->cellWidget(row, 0);
+                    int sleepVal = 100;
+                    if (sleepWidget) {
+                        QLineEdit *sleepEdit = sleepWidget->findChild<QLineEdit *>();
+                        if (sleepEdit) sleepVal = sleepEdit->text().toInt();
+                    }
+
+                    emit addItem_signal(row, isChecked, dialog.getName(), dialog.getScript(), sleepVal);
                 }
             }
         }
     });
 }
 
-void ScriptsView::addItem(bool state, const QString &name, const QString &script_text) {
+void ScriptsView::addItem(bool state, const QString &name, const QString &script_text, int sleepTime) {
     int row = ui->scripts_tableWidget->rowCount();
     ui->scripts_tableWidget->insertRow(row);
+
+    auto *sleepLineEdit = new QLineEdit();
+    sleepLineEdit->setFixedWidth(50);
+    sleepLineEdit->setText(QString::number(sleepTime));
+    sleepLineEdit->setValidator(new QIntValidator(0, 1000000, this));
+
+    auto *sleepWidget = new QWidget(ui->scripts_tableWidget);
+    auto *sleepLayout = new QHBoxLayout(sleepWidget);
+    sleepLayout->addWidget(sleepLineEdit);
+    sleepLayout->setAlignment(Qt::AlignCenter);
+    sleepLayout->setContentsMargins(0, 0, 0, 0);
+    ui->scripts_tableWidget->setCellWidget(row, 0, sleepWidget);
 
     auto *nameItem = new QTableWidgetItem(name);
     nameItem->setFlags(nameItem->flags() ^ Qt::ItemIsEditable);
     nameItem->setData(Qt::UserRole, script_text);
-    ui->scripts_tableWidget->setItem(row, 0, nameItem);
+    ui->scripts_tableWidget->setItem(row, 1, nameItem);
 
     auto *checkBox = new QCheckBox();
     checkBox->setChecked(state);
 
-    connect(checkBox, &QCheckBox::toggled, this, [this, checkBox](bool checked) {
-        QWidget *checkBoxWidget = checkBox->parentWidget();
+    auto updateSignal = [this, checkBox, sleepLineEdit, nameItem]() {
         int currentRow = -1;
         for (int i = 0; i < ui->scripts_tableWidget->rowCount(); ++i) {
-            if (ui->scripts_tableWidget->cellWidget(i, 1) == checkBoxWidget) {
+            if (ui->scripts_tableWidget->item(i, 1) == nameItem) {
                 currentRow = i;
                 break;
             }
         }
-
         if (currentRow == -1) return;
 
-        QTableWidgetItem *nameItem = ui->scripts_tableWidget->item(currentRow, 0);
+        bool checked = checkBox->isChecked();
         QString name = nameItem->text();
         QString scriptText = nameItem->data(Qt::UserRole).toString();
+        int sleepVal = sleepLineEdit->text().toInt();
 
         if (checked) {
             nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEnabled);
-            emit addItem_signal(currentRow, checked, name, scriptText);
+            sleepLineEdit->setEnabled(false);
         } else {
             nameItem->setFlags(nameItem->flags() | Qt::ItemIsEnabled);
-            emit addItem_signal(currentRow, checked, name, scriptText);
+            sleepLineEdit->setEnabled(true);
         }
-    });
+        emit addItem_signal(currentRow, checked, name, scriptText, sleepVal);
+    };
+
+    connect(checkBox, &QCheckBox::toggled, this, updateSignal);
+    connect(sleepLineEdit, &QLineEdit::editingFinished, this, updateSignal);
 
     QWidget *checkBoxWidget = new QWidget(ui->scripts_tableWidget);
     QHBoxLayout *layout = new QHBoxLayout(checkBoxWidget);
     layout->addWidget(checkBox);
     layout->setAlignment(Qt::AlignCenter);
     layout->setContentsMargins(0, 0, 0, 0);
-    ui->scripts_tableWidget->setCellWidget(row, 1, checkBoxWidget);
+    ui->scripts_tableWidget->setCellWidget(row, 2, checkBoxWidget);
 
     // Initial state handling
     if (state) {
         nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEnabled);
+        sleepLineEdit->setEnabled(false);
     }
 }
 

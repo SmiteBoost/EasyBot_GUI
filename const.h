@@ -761,6 +761,7 @@ struct Script {
     std::string name;
     std::string text;
     bool enabled;
+    int sleepTime = 100;
 };
 
 struct MessageStruct {

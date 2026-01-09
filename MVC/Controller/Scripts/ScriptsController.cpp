@@ -23,8 +23,8 @@ void ScriptsController::showView() {
     m_view->show();
 }
 
-void ScriptsController::addItem_View(const int &id, bool state, const QString &name, const QString &script_text) {
-    m_model->addItem(id, state, name, script_text);
+void ScriptsController::addItem_View(const int &id, bool state, const QString &name, const QString &script_text, int sleepTime) {
+    m_model->addItem(id, state, name, script_text, sleepTime);
 }
 
 void ScriptsController::deleteItem_View(const int& index) {
@@ -44,8 +44,8 @@ void ScriptsController::loadSettings(const QJsonArray& json) {
     if (m_model) m_model->fromJson(json);
 }
 
-void ScriptsController::addItem_Model(bool state, const QString &name, const QString &script_text) {
-    m_view->addItem(state, name, script_text);
+void ScriptsController::addItem_Model(bool state, const QString &name, const QString &script_text, int sleepTime) {
+    m_view->addItem(state, name, script_text, sleepTime);
 }
 
 void ScriptsController::clearTableWidget_Model() {

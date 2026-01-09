@@ -15,7 +15,7 @@ public:
     ~ScriptsModel();
 
 
-    void addItem(const int &id, bool state, const QString &name, const QString &script_text);
+    void addItem(const int &id, bool state, const QString &name, const QString &script_text, int sleepTime);
     void deleteItem(const int &index);
     void startScripts(bool state);
 
@@ -24,7 +24,7 @@ public:
 
     signals:
     void clearTableWidget_signal();
-    void addItem_signal(bool state, const QString &name, const QString &script_text);
+    void addItem_signal(bool state, const QString &name, const QString &script_text, int sleepTime);
 
 private:
     std::vector<Script> scripts;
