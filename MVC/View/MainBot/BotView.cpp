@@ -42,9 +42,11 @@ BotView::BotView(QWidget *parent)
     connect(ui->save_pushButton, &QPushButton::clicked, this, &BotView::onSaveClicked);
     connect(ui->load_pushButton, &QPushButton::clicked, this, &BotView::onLoadClicked);
 
-    for (const auto & entry : std::filesystem::directory_iterator("Save")) {
-        std::filesystem::path p = entry.path();
-        ui->profiles_listWidget->addItem(p.stem().string().c_str());
+    for (const auto& entry : std::filesystem::directory_iterator("Save")) {
+        const std::filesystem::path& p = entry.path();
+        if (p.extension() == ".json") {
+            ui->profiles_listWidget->addItem(p.stem().string().c_str());
+        }
     }
 
     if (QSystemTrayIcon::isSystemTrayAvailable()) {

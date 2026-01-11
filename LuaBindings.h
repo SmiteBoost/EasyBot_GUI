@@ -110,7 +110,15 @@ namespace LuaBindings {
                 // Map
                 .addFunction("getTile", &BotClient::getTile)
                 .addFunction("getSpectators", &BotClient::getSpectators)
-                .addFunction("findPath", &BotClient::findPath)
+                .addFunction("findPath", [](BotClient* client, const Position& startPos, const Position& goalPos, int maxComplexity, int flags) -> std::vector<int> {
+                    auto dirs = client->findPath(startPos, goalPos, maxComplexity, flags);
+                    std::vector<int> intDirs;
+                    intDirs.reserve(dirs.size());
+                    for(auto dir : dirs) {
+                        intDirs.push_back(static_cast<int>(dir));
+                    }
+                    return intDirs;
+                })
                 .addFunction("isWalkable", &BotClient::isWalkable)
                 .addFunction("isSightClear", &BotClient::isSightClear)
                 // Thing

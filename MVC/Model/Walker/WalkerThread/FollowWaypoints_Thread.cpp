@@ -53,7 +53,7 @@ void FollowWaypoints_Thread::run() {
                 if (wpt.option == "Stand" || wpt.option == "Lure" || wpt.option == "Node") performWalk(wpt, localPlayer);
                 if (wpt.option == "Use") performUse(wpt, localPlayer);
                 if (wpt.option == "Action") {
-                    index = performAction(wpt, index, localPlayer);
+                    index = performAction(wpt, index);
                     if (index == -1) return;
                     wpt = waypoints[index];
                 }
@@ -90,6 +90,7 @@ void FollowWaypoints_Thread::run() {
 }
 
 bool FollowWaypoints_Thread::checkWaypoint(Waypoint wpt, Position playerPos) {
+    if (wpt.option == "Label") return true;
     if (wpt.option == "Node") {
         if (playerPos.z == wpt.position.z) {
             int dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(wpt.position.x)),
@@ -113,12 +114,7 @@ void FollowWaypoints_Thread::performWalk(Waypoint wpt, uintptr_t localPlayer) {
     proto->autoWalk(localPlayer, wpt.position, false);
 }
 
-size_t FollowWaypoints_Thread::performAction(Waypoint wpt, size_t index, uintptr_t localPlayer) {
-    auto playerPos = proto->getPosition(localPlayer);
-    if ((playerPos.x != wpt.position.x || playerPos.y != wpt.position.y) && playerPos.z == wpt.position.z) {
-        proto->autoWalk(localPlayer, wpt.position, true);
-        return index;
-    }
+size_t FollowWaypoints_Thread::performAction(Waypoint wpt, size_t index) {
     auto* actionEngine = new LuaEngine(wpt.action, nullptr);
     actionEngine->start();
     while (actionEngine->isRunning()) {
@@ -140,6 +136,7 @@ size_t FollowWaypoints_Thread::performAction(Waypoint wpt, size_t index, uintptr
             }
         }
     }
+    index = (index + 1) % waypoints.size();
     return index;
 }
 

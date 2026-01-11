@@ -26,7 +26,7 @@ private:
     bool checkWaypoint(Waypoint wpt, Position playerPos);
     int findClosest();
     void performWalk(Waypoint wpt, uintptr_t localPlayer);
-    size_t performAction(Waypoint wpt, size_t index, uintptr_t localPlayer);
+    size_t performAction(Waypoint wpt, size_t index);
     void performUse(Waypoint wpt, uintptr_t localPlayer);
     Otc::Direction getDirection(const std::string& wpt_direction);
     int bestWpt(Waypoint first_wpt, Waypoint second_wpt);

@@ -1,9 +1,28 @@
 #include "LuaEngine.h"
+#include <QFile>
+#include <QTextStream>
+#include <QDir>
 
 
 void LuaEngine::run() {
     initLua();
-    executeLuaScript(m_script);
+
+    std::string scriptToExecute = m_script;
+    if (m_script.size() > 4 && m_script.substr(m_script.size() - 4) == ".lua") {
+        QString path = QDir::current().absoluteFilePath("Save/" + QString::fromStdString(m_script));
+        QFile file(path);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QTextStream in(&file);
+            scriptToExecute = in.readAll().toStdString();
+            std::cout << "Loading script from file: " << path.toStdString() << std::endl;
+        } else {
+            std::cerr << "Could not open script file: " << path.toStdString() << std::endl;
+            // Optionally: execute m_script as raw lua if file not found, 
+            // but usually a .lua filename isn't valid lua code alone.
+        }
+    }
+
+    executeLuaScript(scriptToExecute);
     closeLua();
 }
 
