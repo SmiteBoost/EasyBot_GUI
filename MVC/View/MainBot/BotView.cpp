@@ -29,6 +29,8 @@ BotView::BotView(QWidget *parent)
     connect(ui->alarms_pushButton, &QPushButton::clicked, this, &BotView::openAlarmsViewRequested);
     connect(ui->miscellaneous_pushButton, &QPushButton::clicked, this, &BotView::openMiscellaneousViewRequested);
 
+
+    connect(ui->all_checkBox, &QCheckBox::toggled, this, &BotView::startAll_signal);
     connect(ui->walker_checkBox, &QCheckBox::toggled, this, &BotView::startWalker_signal);
     connect(ui->targeting_checkBox, &QCheckBox::toggled, this, &BotView::startTargeting_signal);
     connect(ui->looting_checkBox, &QCheckBox::toggled, this, &BotView::startLooting_signal);
@@ -110,6 +112,34 @@ void BotView::onLoadClicked() {
 
 void BotView::showAboutQt() {
     QApplication::aboutQt();
+}
+
+void BotView::setWalkerChecked(bool state) {
+    ui->walker_checkBox->setChecked(state);
+}
+
+void BotView::setTargetingChecked(bool state) {
+    ui->targeting_checkBox->setChecked(state);
+}
+
+void BotView::setLootingChecked(bool state) {
+    ui->looting_checkBox->setChecked(state);
+}
+
+void BotView::setHealingChecked(bool state) {
+    ui->healing_checkBox->setChecked(state);
+}
+
+void BotView::setSpellsChecked(bool state) {
+    ui->spells_checkBox->setChecked(state);
+}
+
+void BotView::setScriptsChecked(bool state) {
+    ui->scripts_checkBox->setChecked(state);
+}
+
+void BotView::setAgentAIChecked(bool state) {
+    ui->ai_checkBox->setChecked(state);
 }
 
 

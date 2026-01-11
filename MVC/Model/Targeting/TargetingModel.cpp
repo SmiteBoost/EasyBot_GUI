@@ -96,8 +96,6 @@ QJsonArray TargetingModel::toJson() const {
         jsonObj["attack"] = QString::fromStdString(target.monstersAttacks);
         jsonArray.append(jsonObj);
     }
-    
-    // Add blocked tiles as a separate object
     QJsonArray blockedTilesArray;
     for (const auto &tile : blockedTiles) {
         QJsonObject tileObj;
@@ -106,8 +104,6 @@ QJsonArray TargetingModel::toJson() const {
         tileObj["z"] = static_cast<int>(tile.z);
         blockedTilesArray.append(tileObj);
     }
-    
-    // Return array with targets and blocked tiles
     QJsonObject mainObj;
     mainObj["targets"] = jsonArray;
     mainObj["blockedTiles"] = blockedTilesArray;
@@ -122,12 +118,8 @@ void TargetingModel::fromJson(const QJsonArray &json) {
     blockedTiles.clear();
     emit clearListWidget_signal();
     emit clearBlockedTilesListWidget_signal();
-    
-    // Check if this is the new format (object with targets and blockedTiles)
     if (!json.isEmpty() && json[0].isObject()) {
         QJsonObject mainObj = json[0].toObject();
-        
-        // Load targets
         if (mainObj.contains("targets")) {
             QJsonArray targetsArray = mainObj["targets"].toArray();
             for (const auto &val : targetsArray) {
@@ -140,8 +132,6 @@ void TargetingModel::fromJson(const QJsonArray &json) {
                 addItem(name, dist, count, stance, attack);
             }
         }
-        
-        // Load blocked tiles
         if (mainObj.contains("blockedTiles")) {
             QJsonArray tilesArray = mainObj["blockedTiles"].toArray();
             for (const auto &val : tilesArray) {
@@ -153,7 +143,6 @@ void TargetingModel::fromJson(const QJsonArray &json) {
             }
         }
     } else {
-        // Old format - just targets
         for (const auto &val : json) {
             QJsonObject obj = val.toObject();
             QString name = obj["name"].toString();

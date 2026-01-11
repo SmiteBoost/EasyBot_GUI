@@ -21,6 +21,16 @@ public:
     explicit BotView(QWidget *parent = nullptr);
     ~BotView() override;
 
+public:
+    // Setters for CheckBoxes
+    void setWalkerChecked(bool state);
+    void setTargetingChecked(bool state);
+    void setLootingChecked(bool state);
+    void setHealingChecked(bool state);
+    void setSpellsChecked(bool state);
+    void setScriptsChecked(bool state);
+    void setAgentAIChecked(bool state);
+
     signals:
 
     void openWalkerView();
@@ -33,6 +43,7 @@ public:
     void openAlarmsViewRequested();
     void openMiscellaneousViewRequested();
 
+    void startAll_signal(bool state);
     void startWalker_signal(bool state);
     void startTargeting_signal(bool state);
     void startLooting_signal(bool state);
@@ -44,7 +55,6 @@ public:
 
     void saveRequested(const QString &name, const QString &category);
     void loadRequested(const QString &name, const QString &category);
-
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);

@@ -23,6 +23,32 @@ BotController::BotController(BotView *botView, QObject *parent)
     connect(m_botView, &BotView::openAlarmsViewRequested, this, &BotController::onShowAlarmsModule);
     connect(m_botView, &BotView::openMiscellaneousViewRequested, this, &BotController::onShowMiscellaneousModule);
 
+
+    // Start All
+    connect(m_botView, &BotView::startAll_signal, this, [this](bool checked){
+        if (m_walkerController) {
+            m_botView->setWalkerChecked(checked);
+        }
+        if (m_targetingController) {
+            m_botView->setTargetingChecked(checked);
+        }
+        if (m_lootingController) {
+            m_botView->setLootingChecked(checked);
+        }
+        if (m_healingController) {
+            m_botView->setHealingChecked(checked);
+        }
+        if (m_spellsController) {
+            m_botView->setSpellsChecked(checked);
+        }
+        if (m_scriptsController) {
+            m_botView->setScriptsChecked(checked);
+        }
+        if (m_agentAIController) {
+            m_botView->setAgentAIChecked(checked);
+        }
+    });
+
     // Walker
     connect(m_botView, &BotView::startWalker_signal, this, [this](bool checked){
         if (m_walkerController) {
@@ -32,30 +58,30 @@ BotController::BotController(BotView *botView, QObject *parent)
 
     // Targeting
     connect(m_botView, &BotView::startTargeting_signal, this, [this](bool checked){
-    if (m_targetingController) {
-        m_targetingController->startTargeting_slot(checked);
-    }
+        if (m_targetingController) {
+            m_targetingController->startTargeting_slot(checked);
+        }
     });
 
     // Looting
     connect(m_botView, &BotView::startLooting_signal, this, [this](bool checked){
-    if (m_lootingController) {
-        m_lootingController->startLooting_slot(checked);
-    }
+        if (m_lootingController) {
+            m_lootingController->startLooting_slot(checked);
+        }
     });
 
     // Healing
     connect(m_botView, &BotView::startHealing_signal, this, [this](bool checked){
-    if (m_healingController) {
-        m_healingController->startHealing_slot(checked);
-    }
+        if (m_healingController) {
+            m_healingController->startHealing_slot(checked);
+        }
     });
 
     // Spells
     connect(m_botView, &BotView::startSpells_signal, this, [this](bool checked){
-    if (m_spellsController) {
-        m_spellsController->startSpells_slot(checked);
-    }
+        if (m_spellsController) {
+            m_spellsController->startSpells_slot(checked);
+        }
     });
 
     // Scripts
@@ -100,28 +126,34 @@ void BotController::onSaveRequested(const QString &name, const QString &category
     }
 
     if (category == "All" || category == "Healing") {
-        if (!m_healingController) m_healingController = new HealingController();
-        rootObject["Healing"] = m_healingController->saveSettings();
+        if (m_healingController) {
+            rootObject["Healing"] = m_healingController->saveSettings();
+        }
     }
     if (category == "All" || category == "Walker") {
-        if (!m_walkerController) m_walkerController = new WalkerController();
-        rootObject["Walker"] = m_walkerController->saveSettings();
+        if (m_walkerController) {
+            rootObject["Walker"] = m_walkerController->saveSettings();
+        }
     }
     if (category == "All" || category == "Targeting") {
-        if (!m_targetingController) m_targetingController = new TargetingController();
-        rootObject["Targeting"] = m_targetingController->saveSettings();
+        if (m_targetingController) {
+            rootObject["Targeting"] = m_targetingController->saveSettings();
+        }
     }
     if (category == "All" || category == "Looting") {
-        if (!m_lootingController) m_lootingController = new LootingController();
-        rootObject["Looting"] = m_lootingController->saveSettings();
+        if (m_lootingController) {
+            rootObject["Looting"] = m_lootingController->saveSettings();
+        }
     }
     if (category == "All" || category == "Spells") {
-        if (!m_spellsController) m_spellsController = new SpellsController();
-        rootObject["Spells"] = m_spellsController->saveSettings();
+        if (m_spellsController) {
+            rootObject["Spells"] = m_spellsController->saveSettings();
+        }
     }
     if (category == "All" || category == "Scripts") {
-        if (!m_scriptsController) m_scriptsController = new ScriptsController();
-        rootObject["Scripts"] = m_scriptsController->saveSettings();
+        if (m_scriptsController) {
+            rootObject["Scripts"] = m_scriptsController->saveSettings();
+        }
     }
 
     QFile file(filePath);

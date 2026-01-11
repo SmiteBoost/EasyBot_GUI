@@ -21,7 +21,9 @@ private:
     std::vector<Waypoint> waypoints;
     std::string luaScriptText;
     LuaEngine* luaScriptEngine;
-    
+
+
+    bool checkWaypoint(Waypoint wpt, Position playerPos);
     int findClosest();
     void performWalk(Waypoint wpt, uintptr_t localPlayer);
     size_t performAction(Waypoint wpt, size_t index, uintptr_t localPlayer);

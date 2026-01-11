@@ -61,7 +61,7 @@ void FollowWaypoints_Thread::run() {
         } else {
             msleep(500);
         }
-        if (playerPos.x == wpt.position.x && playerPos.y == wpt.position.y && playerPos.z == wpt.position.z) {
+        if (checkWaypoint(wpt, playerPos)) {
             index = (index + 1) % waypoints.size();
             emit indexUpdate_signal(static_cast<int>(index));
         }
@@ -83,6 +83,20 @@ void FollowWaypoints_Thread::run() {
         luaScriptEngine = nullptr;
         std::cout << "Walker Lua script stopped" << std::endl;
     }
+}
+
+bool FollowWaypoints_Thread::checkWaypoint(Waypoint wpt, Position playerPos) {
+    if (wpt.option == "Node") {
+        if (playerPos.z == wpt.position.z) {
+            int dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(wpt.position.x)),
+                std::abs(static_cast<int>(playerPos.y) - static_cast<int>(wpt.position.y)));
+            if (dist <= 2) return true;
+        }
+    } else {
+        if (playerPos.x == wpt.position.x && playerPos.y == wpt.position.y && playerPos.z == wpt.position.z)
+            return true;
+    }
+    return false;
 }
 
 void FollowWaypoints_Thread::performWalk(Waypoint wpt, uintptr_t localPlayer) {
@@ -175,6 +189,8 @@ Otc::Direction FollowWaypoints_Thread::getDirection(const std::string& wpt_direc
     if (wpt_direction == "SE") return Otc::SouthEast;
     return Otc::InvalidDirection;
 }
+
+
 
 int FollowWaypoints_Thread::findClosest() {
     int closestIndex = 0;
