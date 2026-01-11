@@ -41,14 +41,13 @@ void FollowWaypoints_Thread::run() {
 
         // Only walks if we dont have a target or we want to Lure
         if (!engine->hasTarget || wpt.option == "Lure") {
-
             if (wpt.position.z != playerPos.z && wpt.direction == "C" && wpt.option == "Stand") {
                 index = findClosest();
                 stuckTimer.restart();
                 continue;
             }
             if (!proto->isAutoWalking(localPlayer)) {
-                if (wpt.option == "Stand" || wpt.option == "Lure") performWalk(wpt, localPlayer);
+                if (wpt.option == "Stand" || wpt.option == "Lure" || wpt.option == "Node") performWalk(wpt, localPlayer);
                 if (wpt.option == "Use") performUse(wpt, localPlayer);
                 if (wpt.option == "Action") {
                     index = performAction(wpt, index, localPlayer);
