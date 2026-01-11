@@ -47,6 +47,7 @@ void AttackTargets_Thread::run()
                 auto tile = proto->getTile(monsterPos);
                 auto getTopThing = proto->getTopUseThing(tile);
                 proto->open(getTopThing, 0);
+                msleep(500);
             }
             auto spectators = proto->getSpectators(playerPos, false);
             std::vector<uintptr_t> monsters;

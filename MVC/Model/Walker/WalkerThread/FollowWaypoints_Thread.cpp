@@ -107,7 +107,7 @@ void FollowWaypoints_Thread::performWalk(Waypoint wpt, uintptr_t localPlayer) {
     if (wpt.direction != "C") {
         auto direction = getDirection(wpt.direction);
         proto->walk(direction);
-        msleep(1000);
+        msleep(500);
         return;
     }
     proto->autoWalk(localPlayer, wpt.position, false);
@@ -164,7 +164,7 @@ void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer) {
         auto tile = proto->getTile(wptPos);
         auto topThing = proto->getTopUseThing(tile);
         proto->use(topThing);
-        msleep(1500);
+        msleep(500);
     } else {
         auto containers = proto->getContainers();
         for (auto container : containers) {
@@ -174,7 +174,7 @@ void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer) {
                     auto tile = proto->getTile(wptPos);
                     auto topThing = proto->getTopUseThing(tile);
                     proto->useWith(item, topThing);
-                    msleep(1500);
+                    msleep(500);
                     return;
                 }
             }
