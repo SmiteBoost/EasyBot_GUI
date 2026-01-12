@@ -35,7 +35,7 @@ private:
     MonsterCandidate currentTarget{};
 
 
-    void desiredStance(uintptr_t localPlayer);
+    void desiredStance(uintptr_t localPlayer, Position playerPos, Position spectatorPos);
 
     bool isReachable(Position playerPos, Position spectatorPos);
     bool isShootable(uintptr_t spectator, int dist);

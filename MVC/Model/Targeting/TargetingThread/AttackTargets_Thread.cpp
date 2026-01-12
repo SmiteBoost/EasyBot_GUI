@@ -50,6 +50,7 @@ void AttackTargets_Thread::run() {
                     auto monsterPos = proto->getPosition(spectator);
                     int dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(monsterPos.x)),
                         std::abs(static_cast<int>(playerPos.y) - static_cast<int>(monsterPos.y)));
+                    if (target.dist > 0 && dist > target.dist) continue;
                     monsters.push_back({dist, spectator, monsterPos, target});
                     break; // One target can only match one name
                 }
@@ -91,19 +92,15 @@ void AttackTargets_Thread::run() {
                 }
             }
         } else {
-            auto attackingCreature =  proto->getAttackingCreature();
-            if (currentTarget.id != attackingCreature) continue;
+            lootCorpse = true;
             bool reachable = true;
             bool shootable = true;
-
             if (proto->isDead(currentTarget.id)) {
-                lootCorpse = true;
                 continue;
             }
             auto truePos = proto->getPosition(currentTarget.id);
             // It also means target is dead
             if (truePos.x == 0xFFFF) {
-                lootCorpse = true;
                 continue;
             }
             currentTarget.truePos = truePos;
@@ -127,8 +124,7 @@ void AttackTargets_Thread::run() {
                 continue;
             }
             // If Target is reachable and shootable
-            if (proto->isAutoWalking(localPlayer)) continue;
-            desiredStance(localPlayer);
+            desiredStance(localPlayer, playerPos, currentTarget.truePos);
         }
         msleep(50);
     }
@@ -138,31 +134,66 @@ bool AttackTargets_Thread::isReachable(Position playerPos, Position spectatorPos
     auto path = proto->findPath(playerPos, spectatorPos, 100, Otc::PathFindIgnoreCreatures | Otc::PathFindAllowNonPathable);
     if (path.empty()) return false;
     auto lastDir = path.at(path.size() - 1);
-    if (lastDir == Otc::North) spectatorPos.y +=1;
-    if (lastDir == Otc::East) spectatorPos.x -=1;
-    if (lastDir == Otc::South) spectatorPos.y -=1;
-    if (lastDir == Otc::West) spectatorPos.x +=1;
-    if (lastDir == Otc::NorthEast) spectatorPos.x -=1, spectatorPos.y +=1;
-    if (lastDir == Otc::SouthEast) spectatorPos.x -=1, spectatorPos.y -=1;
-    if (lastDir == Otc::SouthWest) spectatorPos.x +=1, spectatorPos.y -=1;
-    if (lastDir == Otc::NorthWest) spectatorPos.x +=1, spectatorPos.y +=1;
-    auto second_path = proto->findPath(playerPos, spectatorPos, 100, Otc::PathFindAllowNonPathable);
-    if (second_path.empty()) return false;
-    currentTarget.truePos = spectatorPos;
-    return true;
+    auto newPos = spectatorPos;
+    if (lastDir == Otc::North) newPos.y +=1;
+    if (lastDir == Otc::East) newPos.x -=1;
+    if (lastDir == Otc::South) newPos.y -=1;
+    if (lastDir == Otc::West) newPos.x +=1;
+    if (lastDir == Otc::NorthEast) newPos.x -=1, newPos.y +=1;
+    if (lastDir == Otc::SouthEast) newPos.x -=1, newPos.y -=1;
+    if (lastDir == Otc::SouthWest) newPos.x +=1, newPos.y -=1;
+    if (lastDir == Otc::NorthWest) newPos.x +=1, newPos.y +=1;
+    auto second_path = proto->findPath(playerPos, newPos, 100, Otc::PathFindAllowNonPathable);
+    if (!second_path.empty()) {
+        return true;
+    }
+    // Check all dirs around the target
+    for (int allDir =0; allDir < 8; allDir++) {
+        if (allDir == lastDir) continue;
+        newPos = spectatorPos;
+        if (allDir == Otc::North) newPos.y +=1;
+        if (allDir == Otc::East) newPos.x -=1;
+        if (allDir == Otc::South) newPos.y -=1;
+        if (allDir == Otc::West) newPos.x +=1;
+        if (allDir == Otc::NorthEast) newPos.x -=1, newPos.y +=1;
+        if (allDir == Otc::SouthEast) newPos.x -=1, newPos.y -=1;
+        if (allDir == Otc::SouthWest) newPos.x +=1, newPos.y -=1;
+        if (allDir == Otc::NorthWest) newPos.x +=1, newPos.y +=1;
+        second_path = proto->findPath(playerPos, newPos, 100, Otc::PathFindAllowNonPathable);
+        if (!second_path.empty()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool AttackTargets_Thread::isShootable(uintptr_t spectator, int dist) {
     return proto->canShoot(spectator, dist);
 }
 
-void AttackTargets_Thread::desiredStance(uintptr_t localPlayer) {
+void AttackTargets_Thread::desiredStance(uintptr_t localPlayer, Position playerPos, Position spectatorPos) {
     if (currentTarget.target.desiredStance == "Chase") {
         for (auto blockedTile : m_blockedTiles) {
             if (blockedTile.x == currentTarget.truePos.x && blockedTile.y == currentTarget.truePos.y && blockedTile.z == currentTarget.truePos.z) return;
         }
-        proto->autoWalk(localPlayer, currentTarget.truePos, false);
-        msleep(100);
+        // Check all dirs around the target
+        for (int allDir =0; allDir < 8; allDir++) {
+            auto newPos = spectatorPos;
+            if (allDir == Otc::North) newPos.y +=1;
+            if (allDir == Otc::East) newPos.x -=1;
+            if (allDir == Otc::South) newPos.y -=1;
+            if (allDir == Otc::West) newPos.x +=1;
+            if (allDir == Otc::NorthEast) newPos.x -=1, newPos.y +=1;
+            if (allDir == Otc::SouthEast) newPos.x -=1, newPos.y -=1;
+            if (allDir == Otc::SouthWest) newPos.x +=1, newPos.y -=1;
+            if (allDir == Otc::NorthWest) newPos.x +=1, newPos.y +=1;
+            auto second_path = proto->findPath(playerPos, newPos, 100, Otc::PathFindAllowNonPathable);
+            if (!second_path.empty()) {
+                proto->autoWalk(localPlayer, currentTarget.truePos, false);
+                msleep(100);
+                return;
+            }
+        }
     }
 }
 

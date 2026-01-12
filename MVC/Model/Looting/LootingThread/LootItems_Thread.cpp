@@ -26,6 +26,7 @@ void LootItems_Thread::run() {
             }
             engine->isLooting = false;
         }
+        msleep(50);
     }
 }
 
