@@ -6,106 +6,83 @@
 
 void FollowWaypoints_Thread::run() {
     if (waypoints.empty()) return;
-    // Start the Lua script if one is set
-    if (!luaScriptText.empty()) {
-        luaScriptEngine = new LuaEngine(luaScriptText, nullptr);
-        luaScriptEngine->start();
-        std::cout << "Started Lua script for walker" << std::endl;
-    }
-    
-    size_t index = findClosest();
+
+    findClosest();
 
     QElapsedTimer stuckTimer;
     stuckTimer.start();
-    size_t lastIndex = index;
 
-    bool canWalk = true;
     Position walkingTo{};
+    bool isAutoWalking = false;
 
 
     while (!isInterruptionRequested()) {
-
-        if (index != lastIndex) {
-            lastIndex = index;
-            stuckTimer.restart();
-        } else if (stuckTimer.hasExpired(10000)) {
-            index = findClosest();
-            lastIndex = index;
-            stuckTimer.restart();
-            emit indexUpdate_signal(static_cast<int>(index));
-        }
         if (engine->hasTarget) stuckTimer.restart();
         auto localPlayer = proto->getLocalPlayer();
         auto playerPos = proto->getPosition(localPlayer);
-        auto wpt = waypoints[index];
+        isAutoWalking = proto->isAutoWalking(localPlayer);
 
-        // Only walks if we dont have a target or we want to Lure
+        auto wpt = waypoints[index];
+        if (wpt.option == "Label") {
+            index = (index + 1) % waypoints.size();
+            emit indexUpdate_signal(static_cast<int>(index));
+            continue;
+        }
+
+        // Reset stuck timer if we are walking
+        if (isAutoWalking) stuckTimer.restart();
+
+        // If we are stuck on same waypoint for more than 20 seconds
+        if (stuckTimer.hasExpired(20000)) {
+            findClosest();
+            stuckTimer.restart();
+            emit indexUpdate_signal(static_cast<int>(index));
+            continue;
+        }
+        // Only walks if we do not have target, or we want to make Lure
         if (!engine->hasTarget || wpt.option == "Lure") {
-            if (wpt.position.z != playerPos.z && wpt.direction == "C" && (wpt.option == "Stand" || wpt.option == "Node")) {
-                index = findClosest();
+            if (wpt.position.z != playerPos.z && wpt.direction == "C" && wpt.option == "Stand") {
+                findClosest();
                 stuckTimer.restart();
                 continue;
             }
+            // If walkingTo waypoint is not the same as current wpt we set canWalk variable to True
             if (wpt.position.x != walkingTo.x || wpt.position.y != walkingTo.y) {
-                canWalk = true;
+                isAutoWalking = false;
             }
-            if (!proto->isAutoWalking(localPlayer) || canWalk) {
-                if (wpt.option == "Stand" || wpt.option == "Lure" || wpt.option == "Node") performWalk(wpt, localPlayer);
-                if (wpt.option == "Use") performUse(wpt, localPlayer);
-                if (wpt.option == "Action") {
-                    index = performAction(wpt, index);
-                    if (index == -1) return;
-                    wpt = waypoints[index];
-                }
+            // If our character is not walking already
+            if (!isAutoWalking) {
+                // Saving to variable walkingTo current wptPos
                 walkingTo = wpt.position;
-                canWalk = false;
+                if (wpt.option == "Stand" || wpt.option == "Lure" || wpt.option == "Node") performWalk(wpt, localPlayer, playerPos);
+                if (wpt.option == "Use") performUse(wpt, localPlayer, playerPos);
+                if (wpt.option == "Action") performAction(wpt);
             } else if (stuckTimer.hasExpired(5000)) {
-                if (wpt.option == "Stand" || wpt.option == "Lure" || wpt.option == "Node") performWalk(wpt, localPlayer);
+                if (wpt.option == "Stand" || wpt.option == "Lure" || wpt.option == "Node") performWalk(wpt, localPlayer, playerPos);
             }
-        } else {
-            msleep(500);
         }
-        if (checkWaypoint(wpt, playerPos)) {
+        msleep(10);
+    }
+}
+
+void FollowWaypoints_Thread::performWalk(Waypoint wpt, uintptr_t localPlayer, Position playerPos) {
+    // If Position is already reached go to next wpt.
+    if (wpt.option == "Node") {
+        int dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(wpt.position.x)),
+            std::abs(static_cast<int>(playerPos.y) - static_cast<int>(wpt.position.y)));
+        if (dist <= 2) {
             index = (index + 1) % waypoints.size();
             emit indexUpdate_signal(static_cast<int>(index));
-        }
-        msleep(50);
-    }
-
-    // Stop the Lua script if running
-    if (luaScriptEngine) {
-        std::cout << "Stopping walker Lua script..." << std::endl;
-        luaScriptEngine->requestStop();
-        
-        if (!luaScriptEngine->wait(1000)) { // 1 second timeout
-            std::cerr << "Warning: Walker Lua script did not finish in time, terminating forcefully" << std::endl;
-            luaScriptEngine->terminate();
-            luaScriptEngine->wait();
-        }
-        
-        delete luaScriptEngine;
-        luaScriptEngine = nullptr;
-        std::cout << "Walker Lua script stopped" << std::endl;
-    }
-}
-
-bool FollowWaypoints_Thread::checkWaypoint(Waypoint wpt, Position playerPos) {
-    if (wpt.option == "Label" || wpt.option == "Action") return true;
-    if (wpt.option == "Node") {
-        if (playerPos.z == wpt.position.z) {
-            int dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(wpt.position.x)),
-                std::abs(static_cast<int>(playerPos.y) - static_cast<int>(wpt.position.y)));
-            if (dist <= 2) return true;
+            return;
         }
     } else {
-        if (playerPos.x == wpt.position.x && playerPos.y == wpt.position.y && playerPos.z == wpt.position.z)
-            return true;
+        if (playerPos.x == wpt.position.x && playerPos.y == wpt.position.y && playerPos.z == wpt.position.z) {
+            index = (index + 1) % waypoints.size();
+            emit indexUpdate_signal(static_cast<int>(index));
+            return;
+        }
     }
-    return false;
-}
-
-void FollowWaypoints_Thread::performWalk(Waypoint wpt, uintptr_t localPlayer) {
-    if (wpt.direction != "C") {
+    if (wpt.direction != "C" && wpt.option == "Stand") {
         auto direction = getDirection(wpt.direction);
         proto->walk(direction);
         msleep(500);
@@ -114,7 +91,7 @@ void FollowWaypoints_Thread::performWalk(Waypoint wpt, uintptr_t localPlayer) {
     proto->autoWalk(localPlayer, wpt.position, false);
 }
 
-size_t FollowWaypoints_Thread::performAction(Waypoint wpt, size_t index) {
+void FollowWaypoints_Thread::performAction(Waypoint wpt) {
     auto* actionEngine = new LuaEngine(wpt.action, nullptr);
     actionEngine->start();
     while (actionEngine->isRunning()) {
@@ -122,7 +99,7 @@ size_t FollowWaypoints_Thread::performAction(Waypoint wpt, size_t index) {
             actionEngine->requestStop();
             actionEngine->wait(1000);
             delete actionEngine;
-            return -1;
+            return;
         }
         msleep(100);
     }
@@ -132,17 +109,17 @@ size_t FollowWaypoints_Thread::performAction(Waypoint wpt, size_t index) {
         for (size_t i = 0; i < waypoints.size(); ++i) {
             if (waypoints[i].action == returnedLabel) {
                 index = i;
-                return index;
+                return;
             }
         }
     }
-    return index;
+    index = (index + 1) % waypoints.size();
+    emit indexUpdate_signal(static_cast<int>(index));
 }
 
-void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer) {
-    auto playerPos = proto->getPosition(localPlayer);
+void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer, Position playerPos) {
     if ((playerPos.x != wpt.position.x || playerPos.y != wpt.position.y) && playerPos.z == wpt.position.z) {
-        proto->autoWalk(localPlayer, wpt.position, true);
+        proto->autoWalk(localPlayer, wpt.position, false);
         return;
     }
     int itemId = std::stoi(wpt.action);
@@ -153,7 +130,7 @@ void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer) {
     if (direction == Otc::South) wptPos.y +=1;
     if (direction == Otc::West) wptPos.x -=1;
     if (direction == Otc::NorthEast) wptPos.x +=1, wptPos.y -=1;
-    if (direction == Otc::SouthEast) wptPos.x -=1, wptPos.y +=1;
+    if (direction == Otc::SouthEast) wptPos.x +=1, wptPos.y +=1;
     if (direction == Otc::SouthWest) wptPos.x -=1, wptPos.y +=1;
     if (direction == Otc::NorthWest) wptPos.x -=1, wptPos.y -=1;
     if (itemId == 0) {
@@ -161,6 +138,8 @@ void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer) {
         auto topThing = proto->getTopUseThing(tile);
         proto->use(topThing);
         msleep(500);
+        index = (index + 1) % waypoints.size();
+        emit indexUpdate_signal(static_cast<int>(index));
     } else {
         auto containers = proto->getContainers();
         for (auto container : containers) {
@@ -171,10 +150,13 @@ void FollowWaypoints_Thread::performUse(Waypoint wpt, uintptr_t localPlayer) {
                     auto topThing = proto->getTopUseThing(tile);
                     proto->useWith(item, topThing);
                     msleep(500);
+                    index = (index + 1) % waypoints.size();
+                    emit indexUpdate_signal(static_cast<int>(index));
                     return;
                 }
             }
         }
+        msleep(100);
     }
 }
 
@@ -191,9 +173,7 @@ Otc::Direction FollowWaypoints_Thread::getDirection(const std::string& wpt_direc
 }
 
 
-
-int FollowWaypoints_Thread::findClosest() {
-    int closestIndex = 0;
+void FollowWaypoints_Thread::findClosest() {
     int minDistance = std::numeric_limits<int>::max();
     auto localPlayer = proto->getLocalPlayer();
     auto playerPos = proto->getPosition(localPlayer);
@@ -208,31 +188,9 @@ int FollowWaypoints_Thread::findClosest() {
         );
         if (dist < minDistance) {
             minDistance = dist;
-            closestIndex = i;
+            index = i;
         }
     }
-    return closestIndex;
-}
-
-
-int FollowWaypoints_Thread::bestWpt(Waypoint first_wpt, Waypoint second_wpt) {
-    auto localPlayer = proto->getLocalPlayer();
-    auto playerPos = proto->getPosition(localPlayer);
-
-    auto f = first_wpt.position;
-    auto s = second_wpt.position;
-    if (f.z != s.z)
-        return 0;
-
-    float distFirst =
-        (f.x - playerPos.x) * (f.x - playerPos.x) +
-        (f.y - playerPos.y) * (f.y - playerPos.y);
-
-    float distSecond =
-        (s.x - playerPos.x) * (s.x - playerPos.x) +
-        (s.y - playerPos.y) * (s.y - playerPos.y);
-
-    return (distFirst < distSecond) ? 0 : 1;
 }
 
 

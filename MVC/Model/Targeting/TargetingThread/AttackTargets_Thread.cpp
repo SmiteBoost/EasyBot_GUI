@@ -3,20 +3,23 @@
 #include <algorithm>
 
 
+// TODO better Attacking
 void AttackTargets_Thread::run()
 {
     if (m_targets.empty()) return;
 
-    Position lastTargetPos{};
     uintptr_t currentTarget = 0;
     size_t index = 0;
     Position monsterPos{};
     bool looted = false;
     engine->hasTarget = false;
+
     while (!isInterruptionRequested()) {
         auto target = m_targets[index];
         auto localPlayer = proto->getLocalPlayer();
         auto playerPos = proto->getPosition(localPlayer);
+
+
         // Attacking target logic
         if (currentTarget) {
             if (proto->isDead(currentTarget)) {
@@ -41,14 +44,23 @@ void AttackTargets_Thread::run()
                 }
             }
         }
+
+        // If player is not attacking
         if (!proto->isAttacking()) {
+            // TODO Better looting
             if (m_openCorpseState && looted) {
                 looted = false;
                 auto tile = proto->getTile(monsterPos);
-                auto getTopThing = proto->getTopUseThing(tile);
-                proto->open(getTopThing, 0);
-                msleep(500);
+                auto tileItems = proto->getTileItems(tile);
+                for (auto tileItem : tileItems) {
+                    if (proto->isContainer(tileItem)) {
+                        proto->open(tileItem, 0);
+                        msleep(1500);
+                        break;
+                    }
+                }
             }
+            // Iterate over all spectators
             auto spectators = proto->getSpectators(playerPos, false);
             std::vector<uintptr_t> monsters;
             for (auto spectator : spectators) {

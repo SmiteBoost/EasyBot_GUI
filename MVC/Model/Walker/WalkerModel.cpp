@@ -29,9 +29,9 @@ void WalkerModel::addItem(const QString &direction, const QString &option, const
     auto position = proto->getPosition(localPlayer);
     QString item = "";
     if (option == "Label") {
-        item = QStringLiteral("%1 %2 %3 %4 %5").arg(action, direction).arg(position.x).arg(position.y).arg(position.z);
+        item = QStringLiteral("%1").arg(action);
     } else if (option == "Action") {
-        item = QStringLiteral("Action %2 %3 %4 %5").arg(direction).arg(position.x).arg(position.y).arg(position.z);
+        item = QStringLiteral("Action");
     } else {
         item = QStringLiteral("%1 %2 %3 %4 %5").arg(option, direction).arg(position.x).arg(position.y).arg(position.z);
     }
@@ -130,9 +130,9 @@ void WalkerModel::fromJson(const QJsonArray &json) {
         waypoints.push_back(wpt);
         QString item = "";
         if (option == "Label") {
-            item = QStringLiteral("%1 %2 %3 %4 %5").arg(action, direction).arg(pos.x).arg(pos.y).arg(pos.z);
+            item = QStringLiteral("%1").arg(action);
         } else if (option == "Action") {
-            item = QStringLiteral("Action %2 %3 %4 %5").arg(direction).arg(pos.x).arg(pos.y).arg(pos.z);
+            item = QStringLiteral("Action");
         } else {
             item = QStringLiteral("%1 %2 %3 %4 %5").arg(option, direction).arg(pos.x).arg(pos.y).arg(pos.z);
         }
