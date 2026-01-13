@@ -22,6 +22,17 @@ void AttackTargets_Thread::run() {
         if (!proto->isAttacking()) {
             if (m_openCorpseState && lootCorpse) {
                 lootCorpse = false;
+                int dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(currentTarget.truePos.x)),
+                    std::abs(static_cast<int>(playerPos.y) - static_cast<int>(currentTarget.truePos.y)));
+                QElapsedTimer walkToCorpseTimer;
+                walkToCorpseTimer.start();
+                while (dist > 1) {
+                    if (walkToCorpseTimer.hasExpired(5000)) break;
+                    dist = std::max(std::abs(static_cast<int>(playerPos.x) - static_cast<int>(currentTarget.truePos.x)),
+                        std::abs(static_cast<int>(playerPos.y) - static_cast<int>(currentTarget.truePos.y)));
+                    proto->autoWalk(localPlayer, currentTarget.truePos, false);
+                    msleep(100);
+                }
                 auto tile = proto->getTile(currentTarget.truePos);
                 auto tileItems = proto->getTileItems(tile);
                 for (auto tileItem : tileItems) {

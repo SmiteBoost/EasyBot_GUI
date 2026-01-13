@@ -20,7 +20,8 @@ private:
     size_t index = 0;
 
 
-    void findClosest();
+    void findClosestWaypoint();
+    void findNextValidWaypoint();
     void performWalk(Waypoint wpt, uintptr_t localPlayer, Position playerPos);
     void performAction(Waypoint wpt);
     void performUse(Waypoint wpt, uintptr_t localPlayer, Position playerPos);

@@ -7,7 +7,7 @@
 void FollowWaypoints_Thread::run() {
     if (waypoints.empty()) return;
 
-    findClosest();
+    findClosestWaypoint();
 
     size_t lastIndex = index;
 
@@ -36,7 +36,7 @@ void FollowWaypoints_Thread::run() {
             lastIndex = index;
             stuckTimer.restart();
         } else if (stuckTimer.hasExpired(10000)) {
-            findClosest();
+            findNextValidWaypoint();
             lastIndex = index;
             stuckTimer.restart();
             emit indexUpdate_signal(static_cast<int>(index));
@@ -44,7 +44,7 @@ void FollowWaypoints_Thread::run() {
         // Only walks if we do not have target, or we want to make Lure
         if (!engine->hasTarget || wpt.option == "Lure") {
             if (wpt.position.z != playerPos.z && wpt.direction == "C" && wpt.option == "Stand") {
-                findClosest();
+                findNextValidWaypoint();
                 stuckTimer.restart();
                 continue;
             }
@@ -175,7 +175,7 @@ Otc::Direction FollowWaypoints_Thread::getDirection(const std::string& wpt_direc
 }
 
 
-void FollowWaypoints_Thread::findClosest() {
+void FollowWaypoints_Thread::findClosestWaypoint() {
     int minDistance = std::numeric_limits<int>::max();
     auto localPlayer = proto->getLocalPlayer();
     auto playerPos = proto->getPosition(localPlayer);
@@ -193,6 +193,26 @@ void FollowWaypoints_Thread::findClosest() {
             index = i;
         }
     }
+}
+
+void FollowWaypoints_Thread::findNextValidWaypoint() {
+    auto localPlayer = proto->getLocalPlayer();
+    auto playerPos = proto->getPosition(localPlayer);
+    for (int i = index; i < waypoints.size(); ++i) {
+        const auto& wpt = waypoints[i];
+        if ((playerPos.z != wpt.position.z || wpt.direction != "C") && (wpt.option != "Node" || wpt.option != "Stand")) {
+            continue;
+        }
+        int dist = std::max(
+            std::abs(static_cast<int>(playerPos.x) - static_cast<int>(wpt.position.x)),
+            std::abs(static_cast<int>(playerPos.y) - static_cast<int>(wpt.position.y))
+        );
+        if (dist < 7) {
+            index = i;
+            return;
+        }
+    }
+
 }
 
 
