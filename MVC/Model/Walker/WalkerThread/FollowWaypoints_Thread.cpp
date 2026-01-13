@@ -9,6 +9,8 @@ void FollowWaypoints_Thread::run() {
 
     findClosest();
 
+    size_t lastIndex = index;
+
     QElapsedTimer stuckTimer;
     stuckTimer.start();
 
@@ -29,15 +31,15 @@ void FollowWaypoints_Thread::run() {
             continue;
         }
 
-        // Reset stuck timer if we are walking
-        if (isAutoWalking) stuckTimer.restart();
-
         // If we are stuck on same waypoint for more than 20 seconds
-        if (stuckTimer.hasExpired(20000)) {
+        if (index != lastIndex) {
+            lastIndex = index;
+            stuckTimer.restart();
+        } else if (stuckTimer.hasExpired(10000)) {
             findClosest();
+            lastIndex = index;
             stuckTimer.restart();
             emit indexUpdate_signal(static_cast<int>(index));
-            continue;
         }
         // Only walks if we do not have target, or we want to make Lure
         if (!engine->hasTarget || wpt.option == "Lure") {
