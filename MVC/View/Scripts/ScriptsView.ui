@@ -14,8 +14,8 @@
    <string>Scripts</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="2" column="0">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="3" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="add_pushButton">
@@ -49,6 +49,41 @@
        </property>
       </column>
      </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QPlainTextEdit" name="consoleOutput_plainTextEdit">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="placeholderText">
+       <string>Console output...</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <layout class="QHBoxLayout" name="consoleInput_layout">
+      <item>
+       <widget class="QLineEdit" name="consoleInput_lineEdit">
+        <property name="placeholderText">
+         <string>Enter Lua code (e.g., print(proto:getContainers()))</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="consoleRun_pushButton">
+        <property name="text">
+         <string>Run</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="consoleClear_pushButton">
+        <property name="text">
+         <string>Clear</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

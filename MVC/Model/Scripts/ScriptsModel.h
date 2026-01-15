@@ -25,6 +25,7 @@ public:
     signals:
     void clearTableWidget_signal();
     void addItem_signal(bool state, const QString &name, const QString &script_text, int sleepTime);
+    void consoleOutput_signal(const QString &text);
 
 private:
     std::vector<Script> scripts;

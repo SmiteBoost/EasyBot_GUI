@@ -21,9 +21,13 @@ public:
     void addItem(bool state, const QString &name, const QString &script_text, int sleepTime);
     void clearTableWidget();
 
+    // Console output append
+    void appendConsole(const QString &text);
+
     signals:
     void addItem_signal(const int &id, bool state, const QString &name, const QString &script_text, int sleepTime);
     void deleteItem_signal(const int &index);
+    void executeConsole_signal(const QString &code);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;

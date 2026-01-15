@@ -4,6 +4,7 @@ ScriptsController::ScriptsController(QObject *parent)
     : QObject(parent) {
     m_model = new ScriptsModel(this);
     m_view = new ScriptsView();
+    m_console = new ScriptsConsole(this);
     m_view->show();
 
     // Scripts View requests
@@ -13,6 +14,11 @@ ScriptsController::ScriptsController(QObject *parent)
     // Scripts Model requests
     connect(m_model, &ScriptsModel::clearTableWidget_signal, this, &ScriptsController::clearTableWidget_Model);
     connect(m_model, &ScriptsModel::addItem_signal, this, &ScriptsController::addItem_Model);
+
+    // Console wiring
+    connect(m_view, &ScriptsView::executeConsole_signal, m_console, &ScriptsConsole::execute);
+    connect(m_console, &ScriptsConsole::output, m_view, &ScriptsView::appendConsole);
+    connect(m_model, &ScriptsModel::consoleOutput_signal, m_view, &ScriptsView::appendConsole);
 }
 
 ScriptsController::~ScriptsController() {

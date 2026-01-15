@@ -15,6 +15,9 @@ protected:
 
 private:
     std::vector<Script> m_scripts;
+
+signals:
+    void consoleOutput(const QString &text);
 };
 
 #endif // SCRIPTSTHREAD_H

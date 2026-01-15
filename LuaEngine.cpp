@@ -6,7 +6,6 @@
 
 void LuaEngine::run() {
     initLua();
-
     std::string scriptToExecute = m_script;
     if (m_script.size() > 4 && m_script.substr(m_script.size() - 4) == ".lua") {
         QString path = QDir::current().absoluteFilePath("Save/" + QString::fromStdString(m_script));
@@ -35,6 +34,8 @@ void LuaEngine::initLua() {
     lua_setfield(L, LUA_REGISTRYINDEX, "LuaEngine_instance");
     
     LuaBindings::registerAll(L);
+
+    installPrint();
 
     // Globalize proto functions
     const char* globalizeSnippet =
@@ -77,6 +78,7 @@ void LuaEngine::executeLuaScript(const std::string &scriptText) {
         // Don't print error if it was intentional interruption
         if (std::string(error) != "Script interrupted") {
             std::cerr << "Lua Error: " << error << std::endl;
+            emit output(QString("Lua Error: ") + QString::fromUtf8(error));
         }
         lua_pop(L, 1);
     } else {
@@ -86,6 +88,7 @@ void LuaEngine::executeLuaScript(const std::string &scriptText) {
             if (lua_isstring(L, -1)) {
                 m_returnedString = lua_tostring(L, -1);
                 std::cout << "Lua script returned: '" << m_returnedString << "'" << std::endl;
+                emit output(QString("Return: ") + QString::fromUtf8(m_returnedString.c_str()));
             }
             lua_pop(L, 1);  // Pop the return value
         }
@@ -94,6 +97,29 @@ void LuaEngine::executeLuaScript(const std::string &scriptText) {
 
 void LuaEngine::requestStop() {
     m_shouldStop.store(true);
+}
+
+int LuaEngine::luaPrintRedirect(lua_State* Ls) {
+    // get instance
+    lua_getfield(Ls, LUA_REGISTRYINDEX, "LuaEngine_instance");
+    auto* self = static_cast<LuaEngine*>(lua_touserdata(Ls, -1));
+    lua_pop(Ls, 1);
+
+    int n = lua_gettop(Ls);
+    std::string msg;
+    for (int i = 1; i <= n; ++i) {
+        const char* s = luaL_tolstring(Ls, i, nullptr);
+        if (s) { msg += s; }
+        if (i < n) msg += "\t";
+        lua_pop(Ls, 1); // pop result of tolstring
+    }
+    if (self) self->output(QString::fromStdString(msg));
+    return 0;
+}
+
+void LuaEngine::installPrint() {
+    lua_pushcfunction(L, &LuaEngine::luaPrintRedirect);
+    lua_setglobal(L, "print");
 }
 
 void LuaEngine::luaHookCallback(lua_State* L, lua_Debug* ar) {

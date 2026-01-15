@@ -48,6 +48,7 @@ void ScriptsModel::startScripts(bool state) {
             connect(runScriptsThread, &QThread::finished, this, [this]() {
                 this->runScriptsThread = nullptr;
             });
+            connect(runScriptsThread, &RunScripts_Thread::consoleOutput, this, &ScriptsModel::consoleOutput_signal);
             runScriptsThread->start();
         }
     } else {

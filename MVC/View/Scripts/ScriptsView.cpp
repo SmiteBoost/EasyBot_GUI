@@ -65,6 +65,25 @@ ScriptsView::ScriptsView(QWidget *parent) :
             }
         }
     });
+
+    // Console input: Enter to execute
+    connect(ui->consoleInput_lineEdit, &QLineEdit::returnPressed, this, [this]() {
+        const QString code = ui->consoleInput_lineEdit->text();
+        if (!code.isEmpty()) {
+            emit executeConsole_signal(code);
+            ui->consoleInput_lineEdit->clear();
+        }
+    });
+    connect(ui->consoleRun_pushButton, &QPushButton::clicked, this, [this]() {
+        const QString code = ui->consoleInput_lineEdit->text();
+        if (!code.isEmpty()) {
+            emit executeConsole_signal(code);
+            ui->consoleInput_lineEdit->clear();
+        }
+    });
+    connect(ui->consoleClear_pushButton, &QPushButton::clicked, this, [this]() {
+        ui->consoleOutput_plainTextEdit->clear();
+    });
 }
 
 void ScriptsView::addItem(bool state, const QString &name, const QString &script_text, int sleepTime) {
@@ -143,5 +162,11 @@ ScriptsView::~ScriptsView() {
 
 bool ScriptsView::eventFilter(QObject *obj, QEvent *event) {
     return QMainWindow::eventFilter(obj, event);
+}
+
+void ScriptsView::appendConsole(const QString &text) {
+    if (!text.isEmpty()) {
+        ui->consoleOutput_plainTextEdit->appendPlainText(text);
+    }
 }
 

@@ -5,6 +5,7 @@
 #include "Scripts/ScriptsModel.h"
 #include "Scripts/ScriptsView.h"
 #include "../../Model/Scripts/ScriptsThread/RunScripts_Thread.h"
+#include "../../Model/Scripts/ScriptsConsole.h"
 
 
 class ScriptsController : public QObject {
@@ -33,6 +34,7 @@ public slots:
 private:
     ScriptsView *m_view;
     ScriptsModel *m_model;
+    ScriptsConsole *m_console;
 };
 
 

@@ -17,6 +17,7 @@ void RunScripts_Thread::run() {
             wrappedScript += "end";
             
             auto* luaEngine = new LuaEngine(wrappedScript, nullptr);
+            QObject::connect(luaEngine, &LuaEngine::output, this, &RunScripts_Thread::consoleOutput, Qt::QueuedConnection);
             luaEngines.push_back(luaEngine);
             luaEngine->start();
         }

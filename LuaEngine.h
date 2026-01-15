@@ -3,6 +3,7 @@
 #include <QThread>
 #include <string>
 #include <atomic>
+#include <QString>
 #include <lua.hpp>
 #include "LuaBindings.h"
 
@@ -23,11 +24,16 @@ private:
     void initLua();
     void closeLua();
     static void luaHookCallback(lua_State* L, lua_Debug* ar);
+    static int luaPrintRedirect(lua_State* L);
+    void installPrint();
 
     lua_State* L = nullptr;
     std::string m_script;
     std::atomic<bool> m_shouldStop;
     std::string m_returnedString;  // Store any string returned by the script
+
+signals:
+    void output(const QString &text);
 };
 
 
