@@ -107,6 +107,7 @@ namespace LuaBindings {
                 .addFunction("isAutoWalking", &BotClient::isAutoWalking)
                 .addFunction("stopAutoWalk", &BotClient::stopAutoWalk)
                 .addFunction("autoWalk", &BotClient::autoWalk)
+                .addFunction("setLightHack", &BotClient::setLightHack)
                 // Map
                 .addFunction("getTile", &BotClient::getTile)
                 .addFunction("getSpectators", &BotClient::getSpectators)

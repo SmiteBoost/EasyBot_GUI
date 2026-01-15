@@ -5,6 +5,13 @@
 #include "../../../../LuaEngine.h"
 
 void FollowWaypoints_Thread::run() {
+    auto localPlayer = proto->getLocalPlayer();
+    std::cout << std::hex << localPlayer << std::endl;
+    while (true) {
+        proto->setLightHack(localPlayer, 0xFFFF);
+        std::cout << "Setting light hack " << std::endl;
+        msleep(100);
+    }
     if (waypoints.empty()) return;
 
     findClosestWaypoint();

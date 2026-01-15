@@ -30,7 +30,7 @@ public:
     // Functions:
     // Container
     uintptr_t getItem(uintptr_t container, uint8_t slot);
-    std::vector<uintptr_t> getItems(uintptr_t container);
+    std::deque<uintptr_t> getItems(uintptr_t container);
     int getItemsCount(uintptr_t container);
     Position getSlotPosition(uintptr_t container, int slot);
     std::string getContainerName(uintptr_t container);
@@ -54,6 +54,7 @@ public:
     void autoWalkGame(const std::vector<Otc::Direction> &dirs, const Position &startPos);
     void turn(Otc::Direction direction);
     void stop();
+    void look(const uintptr_t& thing, const bool isBattleList);
     void move(const uintptr_t &thing, const Position& toPos, int count);
     void moveToParentContainer(const uintptr_t& thing, const int count);
     void use(const uintptr_t &thing);
@@ -118,11 +119,12 @@ public:
     uint16_t getStamina(uintptr_t localPlayer);
     uintptr_t getInventoryItem(uintptr_t localPlayer, Otc::InventorySlot inventorySlot);
     bool hasEquippedItemId(uintptr_t localPlayer, uint16_t itemId, uint8_t tier);
-    uint16_t getInventoryCount(uintptr_t localPlayer, uint16_t itemId, uint8_t tier);
+    int getInventoryCount(uintptr_t localPlayer, uint16_t itemId, uint8_t tier);
     bool hasSight(uintptr_t localPlayer, const Position &pos);
     bool isAutoWalking(uintptr_t localPlayer);
     void stopAutoWalk(uintptr_t localPlayer);
     bool autoWalk(uintptr_t localPlayer, const Position& destination, bool retry = false);
+    void setLightHack(uintptr_t localPlayer, uint16_t lightLevel);
 
     // Map
     uintptr_t getTile(Position tilePos);

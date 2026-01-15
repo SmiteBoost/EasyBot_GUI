@@ -100,6 +100,7 @@ service BotService {
   rpc IsAutoWalking(google.protobuf.UInt64Value) returns (google.protobuf.BoolValue);
   rpc StopAutoWalk(google.protobuf.UInt64Value) returns (google.protobuf.Empty);
   rpc AutoWalk(bot_AutoWalkRequest) returns (google.protobuf.BoolValue);
+  rpc SetLightHack(bot_SetLightHackRequest) returns (google.protobuf.Empty);
 
   // --- Map.h ---
   rpc GetTile(bot_Position) returns (google.protobuf.UInt64Value);
@@ -177,6 +178,11 @@ message bot_AutoWalkRequest {
   uint64 localPlayer = 1;
   bot_Position destination = 2;
   bool retry = 3;
+}
+
+message bot_SetLightHackRequest {
+  uint64 localPlayer = 1;
+  uint32 lightLevel = 2;
 }
 
 message bot_LookRequest {
